@@ -271,6 +271,8 @@ def clean(version, loose):
     else:
         return None
 
+NUMERIC = re.compile("^\d+$")
+
 
 class SemVer(object):
     def __new__(cls, version, loose):
@@ -289,8 +291,6 @@ class SemVer(object):
         instance = super(SemVer, cls).__new__(cls)
         return instance.__init__(version, loose)
 
-    DECIMAL = re.compile("^\d+$")
-
     def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
@@ -308,7 +308,7 @@ class SemVer(object):
         if not m.group(4):
             self.prerelease = []
         else:
-            self.prerelease = [(int(id) if self.DECIMAL.match(id) else id)
+            self.prerelease = [(int(id) if NUMERIC.match(id) else id)
                                for id in m.group(4).strip(".")]
         if m.group(5):
             self.build = m.group(5).split(".")
@@ -369,7 +369,7 @@ class SemVer(object):
             elif a == b:
                 continue
             else:
-                return compareIdentifiers(a, b)
+                return compare_identifiers(a, b)
             i += 1
 
     def inc(self, release):
@@ -418,3 +418,100 @@ class SemVer(object):
             raise ValueError('invalid increment argument: {}'.format(release))
         self.format()
         return self
+
+
+def inc(version, release, loose):  # wow!
+    try:
+        return SemVer(version, loose).inc(release).version
+    except:
+        return None
+
+
+def compare_identifiers(a, b):
+    anum = NUMERIC.match(a)
+    bnum = NUMERIC.match(b)
+
+    if anum and bnum:
+        a = int(a)
+        b = int(b)
+
+    if anum and not bnum:
+        return -1
+    elif bnum and not anum:
+        return 1
+    elif a < b:
+        return -1
+    elif a > b:
+        return 1
+    else:
+        return 0
+
+
+def rcompare_identifiers(a, b):
+    return compare_identifiers(b, a)
+
+
+def compare(a, b, loose):
+    return SemVer(a, loose).compare(b)
+
+
+def compare_loose(a, b):
+    return compare(a, b, True)
+
+
+def rcompare(a, b, loose):
+    return compare(b, a, loose)
+
+
+def sort(list, loose):
+    list.sort(lambda a, b: compare(a, b, loose))
+    return list
+
+
+def rsort(list, loose):
+    list.sort(lambda a, b: rcompare(a, b, loose))
+    return list
+
+
+def gt(a, b, loose):
+    return compare(a, b, loose) > 0
+
+
+def lt(a, b, loose):
+    return compare(a, b, loose) < 0
+
+
+def eq(a, b, loose):
+    return compare(a, b, loose) == 0
+
+
+def neq(a, b, loose):
+    return compare(a, b, loose) != 0
+
+
+def gte(a, b, loose):
+    return compare(a, b, loose) >= 0
+
+
+def lte(a, b, loose):
+    return compare(a, b, loose) <= 0
+
+
+"""
+exports.cmp = cmp;
+function cmp(a, op, b, loose) {
+  var ret;
+  switch (op) {
+    case '===': ret = a === b; break;
+    case '!==': ret = a !== b; break;
+    case '': case '=': case '==': ret = eq(a, b, loose); break;
+    case '!=': ret = neq(a, b, loose); break;
+    case '>': ret = gt(a, b, loose); break;
+    case '>=': ret = gte(a, b, loose); break;
+    case '<': ret = lt(a, b, loose); break;
+    case '<=': ret = lte(a, b, loose); break;
+    default: throw new TypeError('Invalid operator: ' + op);
+  }
+  return ret;
+}
+"""
