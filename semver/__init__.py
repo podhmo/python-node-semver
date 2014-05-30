@@ -176,7 +176,7 @@ src[LONETILDE] = '(?:~>?)'
 TILDETRIM = R()
 src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+'
 regexp[TILDETRIM] = re.compile(src[TILDETRIM], re.M)
-tildeTrimReplace = '$1~'
+tildeTrimReplace = r'\1~'
 
 TILDE = R()
 src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$'
@@ -191,7 +191,7 @@ src[LONECARET] = '(?:\\^)'
 CARETTRIM = R()
 src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+'
 regexp[CARETTRIM] = re.compile(src[CARETTRIM], re.M)
-caretTrimReplace = '$1^'
+caretTrimReplace = r'\1^'
 
 CARET = R()
 src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$'
@@ -213,7 +213,7 @@ src[COMPARATORTRIM] = ('(\\s*)' + src[GTLT] +
 
 #  this one has to use the /g flag
 regexp[COMPARATORTRIM] = re.compile(src[COMPARATORTRIM], re.M)
-comparatorTrimReplace = '$1$2$3'
+comparatorTrimReplace = r'\1\2\3'
 
 
 #  Something like `1.2.3 - 1.2.4`
@@ -530,13 +530,13 @@ def comparator(comp, loose):
     # if (!(this instanceof Comparator))
     #   return new Comparator(comp, loose)
     return Comparator(comp, loose)
-make_commparator = comparator
+make_comparator = comparator
 
 ANY = {}
 
 
 class Comparator(object):
-    def __init(self, comp, loose):
+    def __init__(self, comp, loose):
         logger.debug("comparator: %s %s", comp, loose)
         self.loose = loose
         self.parse(comp)
@@ -581,7 +581,7 @@ class Comparator(object):
 
     def test(self, version):
         logger.debug('Comparator, test %s, %s', version, self.loose)
-        if self.selver == ANY:
+        if self.semver == ANY:
             return True
         else:
             return cmp(version, self.operator, self.semver, self.loose)
@@ -601,10 +601,10 @@ class Range(object):
         self.loose = loose
         #  First, split based on boolean or ||
         self.raw = range_
-        self.set = [self.parse_range(r.strip())
-                    for r in re.split(r"\s*\|\|\s*", range_) if r.length]
+        xs = [self.parse_range(r.strip()) for r in re.split(r"\s*\|\|\s*", range_)]
+        self.set = [r for r in xs if len(r)]
 
-        if not self.set.length:
+        if not len(self.set):
             raise ValueError("Invalid SemVer Range: {}".format(range_))
 
         self.format()
@@ -613,7 +613,7 @@ class Range(object):
         return '<SemVer Comparator "{}">'.format(self.range)
 
     def format(self):
-        self.range = "||".join([" ".join(comps).strip() for comps in self.set]).strip()
+        self.range = "||".join([" ".join(c.value for c in comps).strip() for comps in self.set]).strip()
         return self.range
 
     def __str__(self):
@@ -627,21 +627,22 @@ class Range(object):
             hr = regexp[HYPHENRANGELOOSE]
         else:
             hr = regexp[HYPHENRANGE]
-        range_ = range_.replace(hr, hyphen_replace)
+
+        range_ = hr.sub(hyphen_replace, range_,)
         logger.debug('hyphen replace', range_)
 
         #  `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
-        range_ = range_.replace(regexp[COMPARATORTRIM], comparatorTrimReplace)
+        range_ = regexp[COMPARATORTRIM].sub(comparatorTrimReplace, range_)
         logger.debug('comparator trim %s, %s', range_, regexp[COMPARATORTRIM])
 
         #  `~ 1.2.3` => `~1.2.3`
-        range_ = range_.replace(re[TILDETRIM], tildeTrimReplace)
+        range_ = regexp[TILDETRIM].sub(tildeTrimReplace, range_)
 
         #  `^ 1.2.3` => `^1.2.3`
-        range_ = range_.replace(re[CARETTRIM], caretTrimReplace)
+        range_ = regexp[CARETTRIM].sub(caretTrimReplace, range_)
 
         #  normalize spaces
-        range_ = " ".join(re.split("\s+"))
+        range_ = " ".join(re.split("\s+", range_))
 
         #  At this point, the range is completely trimmed and
         #  ready to be split into comparators.
@@ -657,7 +658,7 @@ class Range(object):
         return set_
 
     def test(self, version):
-        if not version:
+        if version is None:  # xxx
             return False
         for e in self.set:
             if test_set(e, version):
@@ -668,7 +669,7 @@ class Range(object):
 #  Mostly just for testing and legacy API reasons
 def to_comparators(range, loose):
     return [" ".join([c.value for c in comp]).strip().split(" ")
-            for comp in range_(range).set]
+            for comp in make_range(range).set]
 
 
 #  comprised of xranges, tildes, stars, and gtlt's at this point.
@@ -689,7 +690,7 @@ def parse_comparator(comp, loose):
 
 
 def is_x(id):
-    return not id or id.loower() == "x" or id == "*"
+    return not id or id.lower() == "x" or id == "*"
 
 
 #  ~, ~> --> * (any, kinda silly)
@@ -710,7 +711,7 @@ def replace_tilde(comp, loose):
     else:
         r = regexp[TILDE]
 
-    def repr(mob):
+    def repl(mob):
         _, M, m, p, pr = mob.groups()
         logger.debug("tilde %s %s %s %s %s %s", comp, _, M, m, p, pr)
         if is_x(M):
@@ -801,7 +802,7 @@ def replace_xrange(comp, loose):
         r = regexp[XRANGE]
 
     def repl(mob):
-        comp, gtlt, M, m, p, pr = mob.groups()
+        ret, gtlt, M, m, p, pr = mob.groups()
         logger.debug("xrange %s %s %s %s %s %s %s", comp, None, gtlt, M, m, p, pr)
 
         xM = is_x(M)
@@ -848,7 +849,7 @@ def replace_xrange(comp, loose):
         elif xp:
             ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + (int(m) + 1) + '.0-0'
         logger.debug('xRange return %s', ret)
-    r.sub(repl, comp)
+    return r.sub(repl, comp)
 
 
 #  Because * is AND-ed with everything else in the comparator,
@@ -865,9 +866,8 @@ def replace_stars(comp, loose):
 #  1.2 - 3.4.5 => >=1.2.0-0 <=3.4.5
 #  1.2.3 - 3.4 => >=1.2.0-0 <3.5.0-0 Any 3.4.x will do
 #  1.2 - 3.4 => >=1.2.0-0 <3.5.0-0
-def hyphen_replace(m0,
-                   from_, fM, fm, fp, fpr, fb,
-                   to, tM, tm, tp, tpr, tb):
+def hyphen_replace(mob):
+    m0, from_, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb = mob.groups()
     if is_x(fM):
         from_ = ""
     elif is_x(fm):
@@ -892,7 +892,7 @@ def hyphen_replace(m0,
 
 def test_set(set_, version):
     for e in set_:
-        if not e.search(version):
+        if not e.test(version):
             return False
     return True
 
@@ -900,9 +900,9 @@ def test_set(set_, version):
 def satisfies(version, range_, loose):
     try:
         range_ = make_range(range_, loose)
-    except:
+    except Exception as e:
         return False
-    return bool(range_.search(version))
+    return range_.test(version)
 
 
 def max_satisfying(versions, range_, loose):
