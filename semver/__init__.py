@@ -251,7 +251,7 @@ def parse(version, loose):
         r = regexp[FULL]
     m = r.match(version)
     if m:
-        return SemVer(version, loose)
+        return semver(version, loose)
     else:
         return None
 
@@ -274,30 +274,31 @@ def clean(version, loose):
 NUMERIC = re.compile("^\d+$")
 
 
+def semver(version, loose):
+    if isinstance(version, SemVer):
+        if version.loose == loose:
+            return version
+        else:
+            version = version.version
+    elif not isinstance(version, str):  # xxx:
+        raise ValueError("Invalid Version: {}".format(version))
+
+    """
+    if (!(this instanceof SemVer))
+       return new SemVer(version, loose);
+    """
+    return SemVer(version, loose)
+make_semver = semver
+
+
 class SemVer(object):
-    def __new__(cls, version, loose):
-        if isinstance(version, SemVer):
-            if version.loose == loose:
-                return version
-            else:
-                version = version.version
-        elif not isinstance(version, str):  # xxx:
-            raise TypeError("Invalid Version: {}".format(version))
-
-        """
-        if (!(this instanceof SemVer))
-           return new SemVer(version, loose);
-        """
-        instance = super(SemVer, cls).__new__(cls)
-        return instance.__init__(version, loose)
-
     def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
         m = regexp[LOOSE if loose else FULL].match(version.strip)
 
         if not m:
-            raise TypeError("Invalid Version: {}".format(version))
+            raise ValueError("Invalid Version: {}".format(version))
         self.raw = version
 
         #  these are actually numbers
@@ -332,13 +333,13 @@ class SemVer(object):
     def compare(self, other):
         logger.debug('SemVer.compare %s %s %s', self.version, self.loose, other)
         if not isinstance(other, SemVer):
-            other = SemVer(other, self.loose)
+            other = make_semver(other, self.loose)
 
         return self.compare_main(other) or self.compare_pre(other)
 
     def compare_main(self, other):
         if not isinstance(other, SemVer):
-            other = SemVer(other, self.loose)
+            other = make_semver(other, self.loose)
 
         return (compare_identifiers(self.major, other.major) or
                 compare_identifiers(self.minor, other.minor) or
@@ -346,7 +347,7 @@ class SemVer(object):
 
     def compare_pre(self, other):
         if not isinstance(other, SemVer):
-            other = SemVer(other, self.loose)
+            other = make_semver(other, self.loose)
 
         if len(self.prerelease) and not len(other.prerelease):
             return -1
@@ -407,7 +408,7 @@ class SemVer(object):
             if len(self.prerelease) == 0:
                 self.prerelease = [0]
             else:
-                i = len(self.prerelease)-1
+                i = len(self.prerelease) - 1
                 while i >= 0:
                     if isinstance(self.prerelease[i], int):
                         self.prerelease[i] += 1
@@ -422,7 +423,7 @@ class SemVer(object):
 
 def inc(version, release, loose):  # wow!
     try:
-        return SemVer(version, loose).inc(release).version
+        return make_semver(version, loose).inc(release).version
     except:
         return None
 
@@ -452,7 +453,7 @@ def rcompare_identifiers(a, b):
 
 
 def compare(a, b, loose):
-    return SemVer(a, loose).compare(b)
+    return make_semver(a, loose).compare(b)
 
 
 def compare_loose(a, b):
@@ -497,21 +498,485 @@ def lte(a, b, loose):
     return compare(a, b, loose) <= 0
 
 
-"""
-exports.cmp = cmp;
-function cmp(a, op, b, loose) {
-  var ret;
-  switch (op) {
-    case '===': ret = a === b; break;
-    case '!==': ret = a !== b; break;
-    case '': case '=': case '==': ret = eq(a, b, loose); break;
-    case '!=': ret = neq(a, b, loose); break;
-    case '>': ret = gt(a, b, loose); break;
-    case '>=': ret = gte(a, b, loose); break;
-    case '<': ret = lt(a, b, loose); break;
-    case '<=': ret = lte(a, b, loose); break;
-    default: throw new TypeError('Invalid operator: ' + op);
-  }
-  return ret;
-}
-"""
+def cmp(a, op, b, loose):
+    if op == "===":
+        return a == b
+    elif op == "!==":
+        return a != b
+    elif op == "" or op == "=" or op == "==":
+        return eq(a, b, loose)
+    elif op == "!=":
+        return neq(a, b, loose)
+    elif op == ">":
+        return gt(a, b, loose)
+    elif op == ">=":
+        return gte(a, b, loose)
+    elif op == "<":
+        return lt(a, b, loose)
+    elif op == "<=":
+        return lte(a, b, loose)
+    else:
+        raise ValueError("Invalid operator: {}".format(op))
+
+
+def comparator(comp, loose):
+    if isinstance(comp, Comparator):
+        if(comp.loose == loose):
+            return comp
+        else:
+            comp = comp.value
+
+    # if (!(this instanceof Comparator))
+    #   return new Comparator(comp, loose)
+    return Comparator(comp, loose)
+make_commparator = comparator
+
+ANY = {}
+
+
+class Comparator(object):
+    def __init(self, comp, loose):
+        logger.debug("comparator: %s %s", comp, loose)
+        self.loose = loose
+        self.parse(comp)
+
+        if self.semver == ANY:
+            self.value = ""
+        else:
+            self.value = self.operator + self.semver.version
+
+    def parse(self, comp):
+        if self.loose:
+            r = regexp[COMPARATORLOOSE]
+        else:
+            r = regexp[COMPARATOR]
+        m = r.search(comp)
+
+        if m is None:
+            raise ValueError("Invalid comparator: {}".format(comp))
+
+        self.operator = m.group(1)
+        # if it literally is just '>' or '' then allow anything.
+        if m.group(2) is None:
+            self.semver = ANY
+        else:
+            self.semver = semver(m.group(2), self.loose)
+            #  <1.2.3-rc DOES allow 1.2.3-beta (has prerelease)
+            #  >=1.2.3 DOES NOT allow 1.2.3-beta
+            #  <=1.2.3 DOES allow 1.2.3-beta
+            #  However, <1.2.3 does NOT allow 1.2.3-beta,
+            #  even though `1.2.3-beta < 1.2.3`
+            #  The assumption is that the 1.2.3 version has something you
+            #  *don't* want, so we push the prerelease down to the minimum.
+            if (self.operator == '<' and self.semver.prerelease.length):
+                self.semver.prerelease = ["0"]
+                self.semver.format()
+
+    def inspect(self):
+        return '<SemVer Comparator "{}">'.format(self)
+
+    def __str__(self):
+        return self.value
+
+    def test(self, version):
+        logger.debug('Comparator, test %s, %s', version, self.loose)
+        if self.selver == ANY:
+            return True
+        else:
+            return cmp(version, self.operator, self.semver, self.loose)
+
+
+def make_range(range_, loose):
+    if isinstance(range_, Range) and range_.loose == loose:
+        return range_
+
+    # if (!(this instanceof Range))
+    #    return new Range(range, loose);
+    return Range(range_, loose)
+
+
+class Range(object):
+    def __init__(self, range_, loose):
+        self.loose = loose
+        #  First, split based on boolean or ||
+        self.raw = range_
+        self.set = [self.parse_range(r.strip())
+                    for r in re.split(r"\s*\|\|\s*", range_) if r.length]
+
+        if not self.set.length:
+            raise ValueError("Invalid SemVer Range: {}".format(range_))
+
+        self.format()
+
+    def inspect(self):
+        return '<SemVer Comparator "{}">'.format(self.range)
+
+    def format(self):
+        self.range = "||".join([" ".join(comps).strip() for comps in self.set]).strip()
+        return self.range
+
+    def __str__(self):
+        return self.range
+
+    def parse_range(self, range_):
+        loose = self.loose
+        logger.debug('range %s %s', range_, loose)
+        #  `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
+        if loose:
+            hr = regexp[HYPHENRANGELOOSE]
+        else:
+            hr = regexp[HYPHENRANGE]
+        range_ = range_.replace(hr, hyphen_replace)
+        logger.debug('hyphen replace', range_)
+
+        #  `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
+        range_ = range_.replace(regexp[COMPARATORTRIM], comparatorTrimReplace)
+        logger.debug('comparator trim %s, %s', range_, regexp[COMPARATORTRIM])
+
+        #  `~ 1.2.3` => `~1.2.3`
+        range_ = range_.replace(re[TILDETRIM], tildeTrimReplace)
+
+        #  `^ 1.2.3` => `^1.2.3`
+        range_ = range_.replace(re[CARETTRIM], caretTrimReplace)
+
+        #  normalize spaces
+        range_ = " ".join(re.split("\s+"))
+
+        #  At this point, the range is completely trimmed and
+        #  ready to be split into comparators.
+        if loose:
+            comp_re = regexp[COMPARATORLOOSE]
+        else:
+            comp_re = regexp[COMPARATOR]
+        set_ = re.split("\s+", ' '.join([parse_comparator(comp, loose) for comp in range_.split(" ")]))
+        if self.loose:
+            # in loose mode, throw out any that are not valid comparators
+            set_ = [comp for comp in set_ if comp_re.search(comp)]
+        set_ = [make_comparator(comp, loose) for comp in set_]
+        return set_
+
+    def test(self, version):
+        if not version:
+            return False
+        for e in self.set:
+            if test_set(e, version):
+                return True
+        return False
+
+
+#  Mostly just for testing and legacy API reasons
+def to_comparators(range, loose):
+    return [" ".join([c.value for c in comp]).strip().split(" ")
+            for comp in range_(range).set]
+
+
+#  comprised of xranges, tildes, stars, and gtlt's at this point.
+#  already replaced the hyphen ranges
+#  turn into a set of JUST comparators.
+
+def parse_comparator(comp, loose):
+    logger.debug('comp %s', comp)
+    comp = replace_carets(comp, loose)
+    logger.debug('caret %s', comp)
+    comp = replace_tildes(comp, loose)
+    logger.debug('tildes %s', comp)
+    comp = replace_xranges(comp, loose)
+    logger.debug('xrange %s', comp)
+    comp = replace_stars(comp, loose)
+    logger.debug('stars %s', comp)
+    return comp
+
+
+def is_x(id):
+    return not id or id.loower() == "x" or id == "*"
+
+
+#  ~, ~> --> * (any, kinda silly)
+#  ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0
+#  ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0
+#  ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
+#  ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
+#  ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
+
+def replace_tildes(comp, loose):
+    return " ".join([replace_tilde(c, loose)
+                     for c in re.split("\s+", comp.strip())])
+
+
+def replace_tilde(comp, loose):
+    if loose:
+        r = regexp[TILDELOOSE]
+    else:
+        r = regexp[TILDE]
+
+    def repr(mob):
+        _, M, m, p, pr = mob.groups()
+        logger.debug("tilde %s %s %s %s %s %s", comp, _, M, m, p, pr)
+        if is_x(M):
+            ret = ""
+        elif is_x(m):
+            ret = '>=' + M + '.0.0-0 <' + (int(M) + 1) + '.0.0-0'
+        elif is_x(p):
+            # ~1.2 == >=1.2.0- <1.3.0-
+            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + (int(m) + 1) + '.0-0'
+        elif pr:
+            logger.debug("replaceTilde pr %s", pr)
+            if (pr[0] != "-"):
+                pr = '-' + pr
+            ret = '>=' + M + '.' + m + '.' + p + pr +' <' + M + '.' + (int(m) + 1) + '.0-0'
+        else:
+            #  ~1.2.3 == >=1.2.3-0 <1.3.0-0
+            ret = '>=' + M + '.' + m + '.' + p + '-0' +' <' + M + '.' + (int(m) + 1) + '.0-0'
+        logger.debug('tilde return, %s', ret)
+        return ret
+    return r.sub(repl, comp)
+
+
+#  ^ --> * (any, kinda silly)
+#  ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0
+#  ^2.0, ^2.0.x --> >=2.0.0 <3.0.0
+#  ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
+#  ^1.2.3 --> >=1.2.3 <2.0.0
+#  ^1.2.0 --> >=1.2.0 <2.0.0
+def replace_carets(comp, loose):
+    return " ".join([replace_caret(c, loose)
+                     for c in re.split("\s+", comp.strip())])
+
+
+def replace_caret(comp, loose):
+    if loose:
+        r = regexp[CARETLOOSE]
+    else:
+        r = regexp[CARET]
+
+    def repl(mob):
+        _, M, m, p, pr = mob.groups()
+        logger.debug("caret %s %s %s %s %s %s", comp, _, M, m, p, pr)
+
+        if is_x(M):
+            ret = ""
+        elif is_x(m):
+            ret = '>=' + M + '.0.0-0 <' + (int(M) + 1) + '.0.0-0'
+        elif is_x(p):
+            if M == "0":
+                ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + (int(m) + 1) + '.0-0'
+            else:
+                ret = '>=' + M + '.' + m + '.' + p + pr +' <' + M + '.' + (int(m) + 1) + '.0-0'
+        elif is_x(pr):
+            logger.debug('replaceCaret pr %s', pr)
+            if pr[0] != "-":
+                pr = "-" + pr
+            if M == "0":
+                if m == "0":
+                    ret = '=' + M + '.' + m + '.' + p + pr
+                else:
+                    ret = '>=' + M + '.' + m + '.' + p + pr +' <' + M + '.' + (int(m) + 1) + '.0-0'
+            else:
+                ret = '>=' + M + '.' + m + '.' + p + pr + ' <' + (int(M) + 1) + '.0.0-0'
+        else:
+            if M == "0":
+                if m == "0":
+                    ret = '=' + M + '.' + m + '.' + p
+                else:
+                    ret = '>=' + M + '.' + m + '.' + p + '-0' + ' <' + M + '.' + (int(m) + 1) + '.0-0'
+            else:
+                ret = '>=' + M + '.' + m + '.' + p + '-0' +' <' + (int(M) + 1) + '.0.0-0'
+        logger.debug('caret return %s', ret)
+        return ret
+
+    return r.sub(repl, comp)
+
+
+def replace_xranges(comp, loose):
+    return " ".join([replace_xrange(c, loose)
+                     for c in re.split("\s+", comp.strip())])
+
+
+def replace_xrange(comp, loose):
+    comp = comp.strip()
+    if loose:
+        r = regexp[XRANGELOOSE]
+    else:
+        r = regexp[XRANGE]
+
+    def repl(mob):
+        comp, gtlt, M, m, p, pr = mob.groups()
+        logger.debug("xrange %s %s %s %s %s %s %s", comp, None, gtlt, M, m, p, pr)
+
+        xM = is_x(M)
+        xm = xM or is_x(m)
+        xp = xm or is_x(p)
+        any_x = xp
+
+        if gtlt == "=" and any_x:
+            gtlt = ""
+
+        if gtlt and any_x:
+            # replace X with 0, and then append the -0 min-prerelease
+            if xM:
+                M = 0
+            if xm:
+                m = 0
+            if xp:
+                p = 0
+
+            if gtlt == ">":
+                #  >1 => >=2.0.0-0
+                #  >1.2 => >=1.3.0-0
+                #  >1.2.3 => >= 1.2.4-0
+                gtlt = ">="
+                if xM:
+                    #  not change
+                    pass
+                elif xm:
+                    M = int(M) + 1
+                    m = 0
+                    p = 0
+                elif xp:
+                    m = int(m) + 1
+                    p = 0
+                ret = gtlt + M + '.' + m + '.' + p + '-0'
+        elif xM:
+            #  allow any
+            ret = "*"
+        elif xm:
+            #  append '-0' onto the version, otherwise
+            #  '1.x.x' matches '2.0.0-beta', since the tag
+            #  *lowers* the version value
+            ret = '>=' + M + '.0.0-0 <' + (int(M) + 1) + '.0.0-0'
+        elif xp:
+            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + (int(m) + 1) + '.0-0'
+        logger.debug('xRange return %s', ret)
+    r.sub(repl, comp)
+
+
+#  Because * is AND-ed with everything else in the comparator,
+#  and '' means "any version", just remove the *s entirely.
+def replace_stars(comp, loose):
+    logger.debug('replaceStars %s', comp, loose)
+    #  Looseness is ignored here.  star is always as loose as it gets!
+    return regexp[STAR].sub("", comp.strip())
+    return comp.trim().replace(re[STAR], '')
+
+
+#  This function is passed to string.replace(re[HYPHENRANGE])
+#  M, m, patch, prerelease, build
+#  1.2 - 3.4.5 => >=1.2.0-0 <=3.4.5
+#  1.2.3 - 3.4 => >=1.2.0-0 <3.5.0-0 Any 3.4.x will do
+#  1.2 - 3.4 => >=1.2.0-0 <3.5.0-0
+def hyphen_replace(m0,
+                   from_, fM, fm, fp, fpr, fb,
+                   to, tM, tm, tp, tpr, tb):
+    if is_x(fM):
+        from_ = ""
+    elif is_x(fm):
+        from_ = '>=' + fM + '.0.0-0'
+    elif is_x(fp):
+        from_ = '>=' + fM + '.' + fm + '.0-0'
+    else:
+        from_ = ">=" + from_
+
+    if is_x(tM):
+        to = ""
+    elif is_x(tm):
+        to = '<' + (int(tM) + 1) + '.0.0-0'
+    elif is_x(tp):
+        to = '<' + tM + '.' + (int(tm) + 1) + '.0-0'
+    elif tpr:
+        to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr
+    else:
+        to = '<=' + to
+    return (from_ + ' ' + to).strip()
+
+
+def test_set(set_, version):
+    for e in set_:
+        if not e.match(version):
+            return False
+    return True
+
+
+def satisfies(version, range_, loose):
+    try:
+        range_ = make_range(range_, loose)
+    except:
+        return False
+    return bool(range_.match(version))
+
+
+def max_satisfying(versions, range_, loose):
+    xs = [version for version in versions if satisfies(version, range, loose)]
+    if not xs:
+        return None
+    return sorted(xs, cmp=lambda a, b: rcompare(a, b, loose))
+
+
+def valid_range(range_, loose):
+    try:
+        #  Return '*' instead of '' so that truthiness works.
+        #  This will throw if it's invalid anyway
+        return make_range(range_, loose).range or "*"
+    except:
+        return None
+
+
+#  Determine if version is less than all the versions possible in the range
+def ltr(version, range_, loose):
+    return outside(version, range_, "<", loose)
+
+
+#  Determine if version is greater than all the versions possible in the range.
+def rtr(version, range_, loose):
+    return outside(version, range_, ">", loose)
+
+
+def outside(version, range_, hilo, loose):
+    version = make_semver(version, loose)
+    range_ = make_range(range_, loose)
+
+    if hilo == ">":
+        gtfn = gt
+        ltefn = lte
+        ltfn = lt
+        comp = ">"
+        ecomp = ">="
+    elif hilo == "<":
+        gtfn = lt
+        ltefn = gte
+        ltfn = gt
+        comp = "<"
+        ecomp = "<="
+    else:
+        raise ValueError("Must provide a hilo val of '<' or '>'")
+
+    #  If it satisifes the range it is not outside
+    if satisfies(version, range_, loose):
+        return False
+
+    #  From now on, variable terms are as if we're in "gtr" mode.
+    #  but note that everything is flipped for the "ltr" function.
+    for comparators in range_.set:
+        high = None
+        low = None
+
+        for comparator in comparators:
+            high = high or comparator
+            low = low or comparator
+
+            if gtfn(comparator.semver, high.semver, loose):
+                high = comparator
+            elif ltfn(comparator.semver, low.semver, loose):
+                low = comparator
+
+    #  If the edge version comparator has a operator then our version
+    #  isn't outside it
+    if high.operator == comp or high.operator == ecomp:
+        return False
+
+    #  If the lowest version comparator has an operator and our version
+    #  is less than it then it isn't higher than the range
+    if (not low.operator or low.operator == comp) and ltefn(version, low.semver):
+        return False
+    elif low.operator == ecomp and ltfn(version, low.semver):
+        return False
+    return True
