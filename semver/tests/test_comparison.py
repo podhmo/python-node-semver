@@ -46,37 +46,37 @@ def test_gt(v0, v1, loose):
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_lt(v0, v1, loose):
     from semver import lt
-    lt(v1, v0, loose) is True
+    assert lt(v1, v0, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_ngt(v0, v1, loose):
     from semver import gt
-    (not gt(v1, v0, loose)) is True
+    assert (not gt(v1, v0, loose)) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_nlt(v0, v1, loose):
     from semver import lt
-    (not lt(v0, v1, loose)) is True
+    assert (not lt(v0, v1, loose)) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_eq(v0, v1, loose):
     from semver import eq
-    eq(v0, v1, loose) is True
+    assert eq(v0, v0, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_eq2(v0, v1, loose):
     from semver import eq
-    eq(v1, v0, loose) is True
+    assert eq(v1, v1, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_cmp(v0, v1, loose):
     from semver import cmp
-    cmp(v1, "==", v1, loose) is True
+    assert cmp(v1, "==", v1, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
@@ -95,3 +95,20 @@ def test_cmp3(v0, v1, loose):
 def test_cmp4(v0, v1, loose):
     from semver import cmp
     cmp(v0, "!=", v1, loose) is True
+
+"""
+   var v0 = v[0];
+    var v1 = v[1];
+    var loose = v[2];
+    t.ok(gt(v0, v1, loose), "gt('" + v0 + "', '" + v1 + "')");
+    t.ok(lt(v1, v0, loose), "lt('" + v1 + "', '" + v0 + "')");
+    t.ok(!gt(v1, v0, loose), "!gt('" + v1 + "', '" + v0 + "')");
+    t.ok(!lt(v0, v1, loose), "!lt('" + v0 + "', '" + v1 + "')");
+    t.ok(eq(v0, v0, loose), "eq('" + v0 + "', '" + v0 + "')");
+    t.ok(eq(v1, v1, loose), "eq('" + v1 + "', '" + v1 + "')");
+    t.ok(neq(v0, v1, loose), "neq('" + v0 + "', '" + v1 + "')");
+    t.ok(cmp(v1, '==', v1, loose), "cmp('" + v1 + "' == '" + v1 + "')");
+    t.ok(cmp(v0, '>=', v1, loose), "cmp('" + v0 + "' >= '" + v1 + "')");
+    t.ok(cmp(v1, '<=', v0, loose), "cmp('" + v1 + "' <= '" + v0 + "')");
+    t.ok(cmp(v0, '!=', v1, loose), "cmp('" + v0 + "' != '" + v1 + "')");
+ """

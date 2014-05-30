@@ -309,8 +309,9 @@ class SemVer(object):
         if not m.group(4):
             self.prerelease = []
         else:
+
             self.prerelease = [(int(id) if NUMERIC.search(id) else id)
-                               for id in m.group(4).strip(".")]
+                               for id in m.group(4).split(".")]
         if m.group(5):
             self.build = m.group(5).split(".")
         else:
@@ -353,7 +354,7 @@ class SemVer(object):
             return -1
         elif not len(self.prerelease) and len(other.prerelease):
             return 1
-        else:
+        elif not len(self.prerelease) and not len(other.prerelease):
             return 0
 
         i = 0
@@ -361,6 +362,7 @@ class SemVer(object):
             a = list_get(self.prerelease, i)
             b = list_get(other.prerelease, i)
             logger.debug("prerelease compare %s: %s %s", i, a, b)
+            i += 1
             if a is None and b is None:
                 return 0
             elif b is None:
@@ -370,8 +372,7 @@ class SemVer(object):
             elif a == b:
                 continue
             else:
-                return compare_identifiers(a, b)
-            i += 1
+                return compare_identifiers(str(a), str(b))
 
     def inc(self, release):
         if release == 'premajor':
