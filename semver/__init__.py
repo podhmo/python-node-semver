@@ -249,7 +249,7 @@ def parse(version, loose):
         r = regexp[LOOSE]
     else:
         r = regexp[FULL]
-    m = r.match(version)
+    m = r.search(version)
     if m:
         return semver(version, loose)
     else:
@@ -295,21 +295,21 @@ class SemVer(object):
     def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
-        m = regexp[LOOSE if loose else FULL].match(version.strip)
+        m = regexp[LOOSE if loose else FULL].search(version.strip())
 
         if not m:
             raise ValueError("Invalid Version: {}".format(version))
         self.raw = version
 
         #  these are actually numbers
-        self.major = int(re.group(1))
-        self.minor = int(re.gruop(2))
-        self.patch = int(re.group(3))
+        self.major = int(m.group(1))
+        self.minor = int(m.group(2))
+        self.patch = int(m.group(3))
         #  numberify any prerelease numeric ids
         if not m.group(4):
             self.prerelease = []
         else:
-            self.prerelease = [(int(id) if NUMERIC.match(id) else id)
+            self.prerelease = [(int(id) if NUMERIC.search(id) else id)
                                for id in m.group(4).strip(".")]
         if m.group(5):
             self.build = m.group(5).split(".")
@@ -320,8 +320,8 @@ class SemVer(object):
 
     def format(self):
         self.version = "{}.{}.{}".format(self.major, self.minor, self.patch)
-        if self.prerelease:
-            self.version += ("-{}".format(".".join(self.prerelease)))
+        if len(self.prerelease) > 0:
+            self.version += ("-{}".format(".".join(str(v) for v in self.prerelease)))
         return self.version
 
     def inspect(self):
@@ -341,9 +341,9 @@ class SemVer(object):
         if not isinstance(other, SemVer):
             other = make_semver(other, self.loose)
 
-        return (compare_identifiers(self.major, other.major) or
-                compare_identifiers(self.minor, other.minor) or
-                compare_identifiers(self.patch, other.patch))
+        return (compare_identifiers(str(self.major), str(other.major)) or
+                compare_identifiers(str(self.minor), str(other.minor)) or
+                compare_identifiers(str(self.patch), str(other.patch)))
 
     def compare_pre(self, other):
         if not isinstance(other, SemVer):
@@ -429,8 +429,8 @@ def inc(version, release, loose):  # wow!
 
 
 def compare_identifiers(a, b):
-    anum = NUMERIC.match(a)
-    bnum = NUMERIC.match(b)
+    anum = NUMERIC.search(a)
+    bnum = NUMERIC.search(b)
 
     if anum and bnum:
         a = int(a)
@@ -891,7 +891,7 @@ def hyphen_replace(m0,
 
 def test_set(set_, version):
     for e in set_:
-        if not e.match(version):
+        if not e.search(version):
             return False
     return True
 
@@ -901,7 +901,7 @@ def satisfies(version, range_, loose):
         range_ = make_range(range_, loose)
     except:
         return False
-    return bool(range_.match(version))
+    return bool(range_.search(version))
 
 
 def max_satisfying(versions, range_, loose):
