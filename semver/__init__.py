@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import logging
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 import re
 
@@ -532,10 +533,12 @@ def comparator(comp, loose):
     return Comparator(comp, loose)
 make_comparator = comparator
 
-ANY = {}
+ANY = object()
 
 
 class Comparator(object):
+    semver = None
+
     def __init__(self, comp, loose):
         logger.debug("comparator: %s %s", comp, loose)
         self.loose = loose
@@ -629,7 +632,7 @@ class Range(object):
             hr = regexp[HYPHENRANGE]
 
         range_ = hr.sub(hyphen_replace, range_,)
-        logger.debug('hyphen replace', range_)
+        logger.debug('hyphen replace %s', range_)
 
         #  `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
         range_ = regexp[COMPARATORTRIM].sub(comparatorTrimReplace, range_)
@@ -686,11 +689,14 @@ def parse_comparator(comp, loose):
     logger.debug('xrange %s', comp)
     comp = replace_stars(comp, loose)
     logger.debug('stars %s', comp)
+    import pdb; pdb.set_trace()
     return comp
 
 
 def is_x(id):
-    return not id or id.lower() == "x" or id == "*"
+    if id is None:
+        return False  # xxx
+    return id == "" or id.lower() == "x" or id == "*"
 
 
 #  ~, ~> --> * (any, kinda silly)
@@ -803,7 +809,8 @@ def replace_xrange(comp, loose):
 
     def repl(mob):
         ret, gtlt, M, m, p, pr = mob.groups()
-        logger.debug("xrange %s %s %s %s %s %s %s", comp, None, gtlt, M, m, p, pr)
+        logger.debug("xrange %s %s %s %s %s %s %s", comp, ret, gtlt, M, m, p, pr)
+        import pdb; pdb.set_trace()
 
         xM = is_x(M)
         xm = xM or is_x(m)
@@ -812,7 +819,6 @@ def replace_xrange(comp, loose):
 
         if gtlt == "=" and any_x:
             gtlt = ""
-
         if gtlt and any_x:
             # replace X with 0, and then append the -0 min-prerelease
             if xM:
@@ -849,16 +855,16 @@ def replace_xrange(comp, loose):
         elif xp:
             ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + (int(m) + 1) + '.0-0'
         logger.debug('xRange return %s', ret)
+        return ret
     return r.sub(repl, comp)
 
 
 #  Because * is AND-ed with everything else in the comparator,
 #  and '' means "any version", just remove the *s entirely.
 def replace_stars(comp, loose):
-    logger.debug('replaceStars %s', comp, loose)
+    logger.debug('replaceStars %s %s', comp, loose)
     #  Looseness is ignored here.  star is always as loose as it gets!
     return regexp[STAR].sub("", comp.strip())
-    return comp.trim().replace(re[STAR], '')
 
 
 #  This function is passed to string.replace(re[HYPHENRANGE])
@@ -901,6 +907,7 @@ def satisfies(version, range_, loose):
     try:
         range_ = make_range(range_, loose)
     except Exception as e:
+        raise
         return False
     return range_.test(version)
 
