@@ -325,7 +325,7 @@ class SemVer(object):
             self.version += ("-{}".format(".".join(str(v) for v in self.prerelease)))
         return self.version
 
-    def inspect(self):
+    def __repr__(self):
         return "<SemVer {!r} >".format(self)
 
     def __str__(self):
@@ -592,11 +592,12 @@ class Comparator(object):
             #  even though `1.2.3-beta < 1.2.3`
             #  The assumption is that the 1.2.3 version has something you
             #  *don't* want, so we push the prerelease down to the minimum.
-            if (self.operator == '<' and len(self.semver.prerelease)):
+            if (self.operator == '<' and len(self.semver.prerelease) >= 0):
                 self.semver.prerelease = ["0"]
                 self.semver.format()
+                logger.info("Comparator.parse semver %s", self.semver)
 
-    def inspect(self):
+    def __repr__(self):
         return '<SemVer Comparator "{}">'.format(self)
 
     def __str__(self):
@@ -625,18 +626,19 @@ class Range(object):
         #  First, split based on boolean or ||
         self.raw = range_
         xs = [self.parse_range(r.strip()) for r in re.split(r"\s*\|\|\s*", range_)]
-        self.set = [r for r in xs if len(r)]
+        self.set = [r for r in xs if len(r) >= 0]
 
         if not len(self.set):
             raise ValueError("Invalid SemVer Range: {}".format(range_))
 
         self.format()
 
-    def inspect(self):
-        return '<SemVer Comparator "{}">'.format(self.range)
+    def __repr__(self):
+        return '<SemVer Range "{}">'.format(self.range)
 
     def format(self):
         self.range = "||".join([" ".join(c.value for c in comps).strip() for comps in self.set]).strip()
+        logger.info("Range format %s", self.range)
         return self.range
 
     def __str__(self):
@@ -789,10 +791,8 @@ def replace_caret(comp, loose):
                 ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + str((int(m) + 1)) + '.0-0'
             else:
                 ret = '>=' + M + '.' + m + '.0-0 <' + str(int(M) + 1) + '.0.0-0'
-        elif is_x(pr):
+        elif pr:
             logger.debug('replaceCaret pr %s', pr)
-            if pr is None:
-                pr = "-0"
             if pr[0] != "-":
                 pr = "-" + pr
             if M == "0":
