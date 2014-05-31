@@ -335,8 +335,9 @@ class SemVer(object):
         logger.debug('SemVer.compare %s %s %s', self.version, self.loose, other)
         if not isinstance(other, SemVer):
             other = make_semver(other, self.loose)
-
-        return self.compare_main(other) or self.compare_pre(other)
+        result = self.compare_main(other) or self.compare_pre(other)
+        logger.debug("compare result %s", result)
+        return result
 
     def compare_main(self, other):
         if not isinstance(other, SemVer):
@@ -350,11 +351,15 @@ class SemVer(object):
         if not isinstance(other, SemVer):
             other = make_semver(other, self.loose)
 
-        if len(self.prerelease) and not len(other.prerelease):
-            return -1
-        elif not len(self.prerelease) and len(other.prerelease):
+        #  NOT having a prerelease is > having one
+        is_self_more_than_zero = len(self.prerelease) > 0
+        is_other_more_than_zero = len(other.prerelease) > 0
+
+        if not is_self_more_than_zero and is_other_more_than_zero:
             return 1
-        elif not len(self.prerelease) and not len(other.prerelease):
+        elif is_self_more_than_zero and not is_other_more_than_zero:
+            return -1
+        elif not is_self_more_than_zero and not is_other_more_than_zero:
             return 0
 
         i = 0
@@ -500,6 +505,7 @@ def lte(a, b, loose):
 
 
 def cmp(a, op, b, loose):
+    logger.debug("cmp: %s", op)
     if op == "===":
         return a == b
     elif op == "!==":
@@ -913,7 +919,6 @@ def satisfies(version, range_, loose):
     try:
         range_ = make_range(range_, loose)
     except Exception as e:
-        raise
         return False
     return range_.test(version)
 

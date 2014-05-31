@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 import pytest
 # node-semver/test/index.js
+# import logging
+# logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 cands =   [
     ['1.0.0 - 2.0.0', '2.2.3', False],
@@ -59,9 +61,9 @@ cands =   [
     ['^1.2.3', '2.0.0-pre', False]
 ]
 
-cands =   [
-    ['1.0.0 - 2.0.0', '2.2.3', False],
-]
+# cands =   [
+#     ['<1.2.3', '1.2.3-beta', False], # anything wrong
+# ]
 
 
 @pytest.mark.parametrize("range_, version, loose", cands)
