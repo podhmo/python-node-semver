@@ -692,9 +692,9 @@ class Range(object):
 
 
 #  Mostly just for testing and legacy API reasons
-def to_comparators(range, loose):
+def to_comparators(range_, loose):
     return [" ".join([c.value for c in comp]).strip().split(" ")
-            for comp in make_range(range).set]
+            for comp in make_range(range_, loose).set]
 
 
 #  comprised of xranges, tildes, stars, and gtlt's at this point.
