@@ -380,22 +380,34 @@ class SemVer(object):
                 return compare_identifiers(str(a), str(b))
 
     def inc(self, release):
+        self._inc(release)
+        i = -1
+        while len(self.prerelease) > 1 and self.prerelease[i] == 0:
+            self.prerelease.pop()
+        self.format()
+        return self
+
+    def _inc(self, release):
+        logger.debug("inc release %s %s", self.prerelease, release)
         if release == 'premajor':
-            self.inc("major")
-            self.inc("pre")
+            self._inc("major")
+            self._inc("pre")
         elif release == "preminor":
-            self.inc("minor")
-            self.inc("pre")
+            self._inc("minor")
+            self._inc("pre")
         elif release == "prepatch":
-            self.inc("patch")
-            self.inc("pre")
+            self._inc("patch")
+            self._inc("pre")
         elif release == 'prerelease':
             if len(self.prerelease) == 0:
-                self.inc("patch")
-            self.inc("pre")
+                self._inc("patch")
+            self._inc("pre")
         elif release == "major":
             self.major += 1
             self.minor = -1
+            self.minor += 1
+            self.patch = 0
+            self.prerelease = []
         elif release == "minor":
             self.minor += 1
             self.patch = 0
@@ -406,11 +418,12 @@ class SemVer(object):
             #  1.2.0-5 patches to 1.2.0
             #  1.2.0 patches to 1.2.1
             if len(self.prerelease) == 0:
-                self.patches += 1
+                self.patch += 1
             self.prerelease = []
         elif release == "pre":
             #  This probably shouldn't be used publically.
             #  1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
+            logger.debug("inc prerelease %s", self.prerelease)
             if len(self.prerelease) == 0:
                 self.prerelease = [0]
             else:
@@ -419,18 +432,19 @@ class SemVer(object):
                     if isinstance(self.prerelease[i], int):
                         self.prerelease[i] += 1
                         i -= 2
+                    i -= 1
                 if i == -1:  # didn't increment anything
-                    self.prerelease.push(0)
+                    self.prerelease.append(0)
         else:
             raise ValueError('invalid increment argument: {}'.format(release))
-        self.format()
         return self
 
 
 def inc(version, release, loose):  # wow!
     try:
         return make_semver(version, loose).inc(release).version
-    except:
+    except Exception as e:
+        logger.info(e, exc_info=5)
         return None
 
 
