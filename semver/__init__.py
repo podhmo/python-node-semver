@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 import logging
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 import re
 
@@ -554,6 +553,7 @@ class Comparator(object):
             r = regexp[COMPARATORLOOSE]
         else:
             r = regexp[COMPARATOR]
+        logger.debug("parse comp=%s", comp)
         m = r.search(comp)
 
         if m is None:
@@ -572,7 +572,7 @@ class Comparator(object):
             #  even though `1.2.3-beta < 1.2.3`
             #  The assumption is that the 1.2.3 version has something you
             #  *don't* want, so we push the prerelease down to the minimum.
-            if (self.operator == '<' and self.semver.prerelease.length):
+            if (self.operator == '<' and len(self.semver.prerelease)):
                 self.semver.prerelease = ["0"]
                 self.semver.format()
 
@@ -689,14 +689,11 @@ def parse_comparator(comp, loose):
     logger.debug('xrange %s', comp)
     comp = replace_stars(comp, loose)
     logger.debug('stars %s', comp)
-    import pdb; pdb.set_trace()
     return comp
 
 
 def is_x(id):
-    if id is None:
-        return False  # xxx
-    return id == "" or id.lower() == "x" or id == "*"
+    return id is None or id == "" or id.lower() == "x" or id == "*"
 
 
 #  ~, ~> --> * (any, kinda silly)
@@ -718,23 +715,24 @@ def replace_tilde(comp, loose):
         r = regexp[TILDE]
 
     def repl(mob):
-        _, M, m, p, pr = mob.groups()
+        _ = mob.group(0)
+        M, m, p, pr, _ = mob.groups()
         logger.debug("tilde %s %s %s %s %s %s", comp, _, M, m, p, pr)
         if is_x(M):
             ret = ""
         elif is_x(m):
-            ret = '>=' + M + '.0.0-0 <' + (int(M) + 1) + '.0.0-0'
+            ret = '>=' + M + '.0.0-0 <' + str(int(M) + 1) + '.0.0-0'
         elif is_x(p):
             # ~1.2 == >=1.2.0- <1.3.0-
-            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + (int(m) + 1) + '.0-0'
+            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + str(int(m) + 1) + '.0-0'
         elif pr:
             logger.debug("replaceTilde pr %s", pr)
             if (pr[0] != "-"):
                 pr = '-' + pr
-            ret = '>=' + M + '.' + m + '.' + p + pr +' <' + M + '.' + (int(m) + 1) + '.0-0'
+            ret = '>=' + M + '.' + m + '.' + p + pr +' <' + M + '.' + str(int(m) + 1) + '.0-0'
         else:
             #  ~1.2.3 == >=1.2.3-0 <1.3.0-0
-            ret = '>=' + M + '.' + m + '.' + p + '-0' +' <' + M + '.' + (int(m) + 1) + '.0-0'
+            ret = '>=' + M + '.' + m + '.' + p + '-0' +' <' + M + '.' + str(int(m) + 1) + '.0-0'
         logger.debug('tilde return, %s', ret)
         return ret
     return r.sub(repl, comp)
@@ -758,37 +756,40 @@ def replace_caret(comp, loose):
         r = regexp[CARET]
 
     def repl(mob):
-        _, M, m, p, pr = mob.groups()
-        logger.debug("caret %s %s %s %s %s %s", comp, _, M, m, p, pr)
+        m0 = mob.group(0)
+        M, m, p, pr, _ = mob.groups()
+        logger.debug("caret %s %s %s %s %s %s", comp, m0, M, m, p, pr)
 
         if is_x(M):
             ret = ""
         elif is_x(m):
-            ret = '>=' + M + '.0.0-0 <' + (int(M) + 1) + '.0.0-0'
+            ret = '>=' + M + '.0.0-0 <' + str((int(M) + 1)) + '.0.0-0'
         elif is_x(p):
             if M == "0":
-                ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + (int(m) + 1) + '.0-0'
+                ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + str((int(m) + 1)) + '.0-0'
             else:
-                ret = '>=' + M + '.' + m + '.' + p + pr +' <' + M + '.' + (int(m) + 1) + '.0-0'
+                ret = '>=' + M + '.' + m + '.0-0 <' + str(int(M) + 1) + '.0.0-0'
         elif is_x(pr):
             logger.debug('replaceCaret pr %s', pr)
+            if pr is None:
+                pr = "-0"
             if pr[0] != "-":
                 pr = "-" + pr
             if M == "0":
                 if m == "0":
-                    ret = '=' + M + '.' + m + '.' + p + pr
+                    ret = '=' + M + '.' + m + '.' + (p or "") + pr
                 else:
-                    ret = '>=' + M + '.' + m + '.' + p + pr +' <' + M + '.' + (int(m) + 1) + '.0-0'
+                    ret = '>=' + M + '.' + m + '.' + (p or "") + pr +' <' + M + '.' + str(int(m) + 1) + '.0-0'
             else:
-                ret = '>=' + M + '.' + m + '.' + p + pr + ' <' + (int(M) + 1) + '.0.0-0'
+                ret = '>=' + M + '.' + m + '.' + (p or "") + pr + ' <' + str(int(M) + 1) + '.0.0-0'
         else:
             if M == "0":
                 if m == "0":
-                    ret = '=' + M + '.' + m + '.' + p
+                    ret = '=' + M + '.' + m + '.' + (p or "")
                 else:
-                    ret = '>=' + M + '.' + m + '.' + p + '-0' + ' <' + M + '.' + (int(m) + 1) + '.0-0'
+                    ret = '>=' + M + '.' + m + '.' + (p or "") + '-0' + ' <' + M + '.' + str((int(m) + 1)) + '.0-0'
             else:
-                ret = '>=' + M + '.' + m + '.' + p + '-0' +' <' + (int(M) + 1) + '.0.0-0'
+                ret = '>=' + M + '.' + m + '.' + (p or "") + '-0' +' <' + str(int(M) + 1) + '.0.0-0'
         logger.debug('caret return %s', ret)
         return ret
 
@@ -796,6 +797,7 @@ def replace_caret(comp, loose):
 
 
 def replace_xranges(comp, loose):
+    logger.debug('replaceXRanges %s %s', comp, loose)
     return " ".join([replace_xrange(c, loose)
                      for c in re.split("\s+", comp.strip())])
 
@@ -808,9 +810,10 @@ def replace_xrange(comp, loose):
         r = regexp[XRANGE]
 
     def repl(mob):
-        ret, gtlt, M, m, p, pr = mob.groups()
+        ret = mob.group(0)
+        gtlt, M, m, p, pr, _ = mob.groups()
+
         logger.debug("xrange %s %s %s %s %s %s %s", comp, ret, gtlt, M, m, p, pr)
-        import pdb; pdb.set_trace()
 
         xM = is_x(M)
         xm = xM or is_x(m)
@@ -819,6 +822,8 @@ def replace_xrange(comp, loose):
 
         if gtlt == "=" and any_x:
             gtlt = ""
+
+        logger.debug("xrange gtlt=%s any_x=%s", gtlt, any_x)
         if gtlt and any_x:
             # replace X with 0, and then append the -0 min-prerelease
             if xM:
@@ -843,7 +848,7 @@ def replace_xrange(comp, loose):
                 elif xp:
                     m = int(m) + 1
                     p = 0
-                ret = gtlt + M + '.' + m + '.' + p + '-0'
+            ret = gtlt + str(M) + '.' + str(m) + '.' + str(p) + '-0'
         elif xM:
             #  allow any
             ret = "*"
@@ -851,10 +856,11 @@ def replace_xrange(comp, loose):
             #  append '-0' onto the version, otherwise
             #  '1.x.x' matches '2.0.0-beta', since the tag
             #  *lowers* the version value
-            ret = '>=' + M + '.0.0-0 <' + (int(M) + 1) + '.0.0-0'
+            ret = '>=' + M + '.0.0-0 <' + str(int(M) + 1) + '.0.0-0'
         elif xp:
-            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + (int(m) + 1) + '.0-0'
+            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + str(int(m) + 1) + '.0-0'
         logger.debug('xRange return %s', ret)
+
         return ret
     return r.sub(repl, comp)
 
@@ -873,7 +879,7 @@ def replace_stars(comp, loose):
 #  1.2.3 - 3.4 => >=1.2.0-0 <3.5.0-0 Any 3.4.x will do
 #  1.2 - 3.4 => >=1.2.0-0 <3.5.0-0
 def hyphen_replace(mob):
-    m0, from_, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb = mob.groups()
+    from_, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb = mob.groups()
     if is_x(fM):
         from_ = ""
     elif is_x(fm):
@@ -886,9 +892,9 @@ def hyphen_replace(mob):
     if is_x(tM):
         to = ""
     elif is_x(tm):
-        to = '<' + (int(tM) + 1) + '.0.0-0'
+        to = '<' + str(int(tM) + 1) + '.0.0-0'
     elif is_x(tp):
-        to = '<' + tM + '.' + (int(tm) + 1) + '.0-0'
+        to = '<' + tM + '.' + str(int(tm) + 1) + '.0-0'
     elif tpr:
         to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr
     else:

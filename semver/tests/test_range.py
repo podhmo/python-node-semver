@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 import pytest
 # node-semver/test/index.js
+# import logging
+# logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 cands =  [
     ['1.0.0 - 2.0.0', '1.2.3', False],
@@ -91,9 +93,11 @@ cands =  [
     ['^1.2', '1.2.0-pre', False],
     ['^1.2.3', '1.2.3-pre', False]
 ]
+# cands =  [
+#     ['^1.2', '1.4.2', False],
+# ]
 
-
-@pytest.mark.parametrize("v0, v1, loose", cands)
-def test_satisfies(v0, v1, loose):
+@pytest.mark.parametrize("range_, version, loose", cands)
+def test_satisfies(range_, version, loose):
     from semver import satisfies
-    assert satisfies(v0, v1, loose) is True
+    assert satisfies(version, range_, loose) is True
