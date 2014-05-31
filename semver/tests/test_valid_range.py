@@ -87,7 +87,7 @@ cands =   [
 
 
 @pytest.mark.parametrize("pre, wanted, loose", cands)
-def test_satisfies(pre, wanted, loose):
+def test_it(pre, wanted, loose):
     from semver import valid_range
     assert valid_range(pre, loose) == wanted
 

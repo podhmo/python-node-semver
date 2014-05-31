@@ -48,6 +48,6 @@ cands =   [
 
 
 @pytest.mark.parametrize("pre, what, wanted, loose", cands)
-def test_satisfies(pre, what, wanted, loose):
+def test_it(pre, what, wanted, loose):
     from semver import inc
     assert inc(pre, what, loose) == wanted

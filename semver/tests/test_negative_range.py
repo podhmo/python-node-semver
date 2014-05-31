@@ -67,7 +67,7 @@ cands =   [
 
 
 @pytest.mark.parametrize("range_, version, loose", cands)
-def test_satisfies(range_, version, loose):
+def test_it(range_, version, loose):
     from semver import satisfies
     assert (not satisfies(version, range_, loose)) is True
 

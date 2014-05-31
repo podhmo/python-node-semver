@@ -938,10 +938,14 @@ def satisfies(version, range_, loose):
 
 
 def max_satisfying(versions, range_, loose):
-    xs = [version for version in versions if satisfies(version, range, loose)]
-    if not xs:
+    xs = [version for version in versions if satisfies(version, range_, loose)]
+    if len(xs) <= 0:
         return None
-    return sorted(xs, cmp=lambda a, b: rcompare(a, b, loose))
+    selected = xs[0]
+    for x in xs[1:]:
+        if rcompare(selected, x, loose) == 1:
+            selected = x
+    return selected
 
 
 def valid_range(range_, loose):
