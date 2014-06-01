@@ -38,8 +38,8 @@ class PyTest(TestCommand):
         pytest.main(self.test_args)
 
 
-setup(name='semver',
-      version='0.1',
+setup(name='node-semver',
+      version='0.1.1',
       description='port of node-semver',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
