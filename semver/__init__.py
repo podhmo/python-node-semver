@@ -236,6 +236,10 @@ src[HYPHENRANGELOOSE] = ('^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
 STAR = R()
 src[STAR] = '(<|>)?=?\\s*\\*'
 
+# version name recovery for convinient
+RECOVERYVERSIONNAME = R()
+src[RECOVERYVERSIONNAME] = ('v?({n})(?:\\.({n}))?{pre}?'.format(n=src[NUMERICIDENTIFIER], pre=src[PRERELEASELOOSE]))
+
 #  Compile to actual regexp objects.
 #  All are flag-free, unless they were created above with a flag.
 for i in range(R.value()):
@@ -295,27 +299,37 @@ class SemVer(object):
     def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
-        m = regexp[LOOSE if loose else FULL].search(version.strip())
-
-        if not m:
-            raise ValueError("Invalid Version: {}".format(version))
         self.raw = version
 
-        #  these are actually numbers
-        self.major = int(m.group(1))
-        self.minor = int(m.group(2))
-        self.patch = int(m.group(3))
-        #  numberify any prerelease numeric ids
-        if not m.group(4):
-            self.prerelease = []
+        m = regexp[LOOSE if loose else FULL].search(version.strip())
+        if not m:
+            if not loose:
+                raise ValueError("Invalid Version: {}".format(version))
+            m = regexp[RECOVERYVERSIONNAME].search(version.strip())
+            self.major = int(m.group(1)) if m.group(1) else 0
+            self.minor = int(m.group(2)) if m.group(2) else 0
+            self.patch = 0
+            if not m.group(3):
+                self.prerelease = []
+            else:
+                self.prerelease = [(int(id) if NUMERIC.search(id) else id)
+                                   for id in m.group(3).split(".")]
         else:
+            #  these are actually numbers
+            self.major = int(m.group(1))
+            self.minor = int(m.group(2))
+            self.patch = int(m.group(3))
+            #  numberify any prerelease numeric ids
+            if not m.group(4):
+                self.prerelease = []
+            else:
 
-            self.prerelease = [(int(id) if NUMERIC.search(id) else id)
-                               for id in m.group(4).split(".")]
-        if m.group(5):
-            self.build = m.group(5).split(".")
-        else:
-            self.build = []
+                self.prerelease = [(int(id) if NUMERIC.search(id) else id)
+                                   for id in m.group(4).split(".")]
+            if m.group(5):
+                self.build = m.group(5).split(".")
+            else:
+                self.build = []
 
         self.format()  # xxx:
 
@@ -444,7 +458,7 @@ def inc(version, release, loose):  # wow!
     try:
         return make_semver(version, loose).inc(release).version
     except Exception as e:
-        logger.info(e, exc_info=5)
+        logger.debug(e, exc_info=5)
         return None
 
 
@@ -595,7 +609,7 @@ class Comparator(object):
             if (self.operator == '<' and len(self.semver.prerelease) >= 0):
                 self.semver.prerelease = ["0"]
                 self.semver.format()
-                logger.info("Comparator.parse semver %s", self.semver)
+                logger.debug("Comparator.parse semver %s", self.semver)
 
     def __repr__(self):
         return '<SemVer Comparator "{}">'.format(self)
@@ -638,7 +652,7 @@ class Range(object):
 
     def format(self):
         self.range = "||".join([" ".join(c.value for c in comps).strip() for comps in self.set]).strip()
-        logger.info("Range format %s", self.range)
+        logger.debug("Range format %s", self.range)
         return self.range
 
     def __str__(self):
@@ -943,8 +957,11 @@ def max_satisfying(versions, range_, loose):
         return None
     selected = xs[0]
     for x in xs[1:]:
-        if rcompare(selected, x, loose) == 1:
-            selected = x
+        try:
+            if rcompare(selected, x, loose) == 1:
+                selected = x
+        except ValueError:
+            logger.warn("{} is invalud version".format(x))
     return selected
 
 
