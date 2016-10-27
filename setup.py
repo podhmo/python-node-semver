@@ -61,5 +61,6 @@ setup(name='semver',
           },
       tests_require = tests_require,
       cmdclass = {'test': PyTest},
-      entry_points = """      """
+      entry_points = """      """,
+      license="mit",
       )
