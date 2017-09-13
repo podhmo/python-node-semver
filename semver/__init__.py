@@ -345,7 +345,7 @@ class SemVer(object):
         return self.version
 
     def __repr__(self):
-        return "<SemVer {!r} >".format(self)
+        return "<SemVer {} >".format(self)
 
     def __str__(self):
         return self.version
