@@ -858,41 +858,45 @@ def replace_xrange(comp, loose):
             gtlt = ""
 
         logger.debug("xrange gtlt=%s any_x=%s", gtlt, any_x)
-        if gtlt and any_x:
+        if xM:
+            if gtlt == '>' or gtlt == '<':
+                # nothing is allowed
+                ret = '<0.0.0'
+            else:
+                ret = '*'
+        elif gtlt and any_x:
             # replace X with 0, and then append the -0 min-prerelease
-            if xM:
-                M = 0
             if xm:
                 m = 0
             if xp:
                 p = 0
 
             if gtlt == ">":
-                #  >1 => >=2.0.0-0
-                #  >1.2 => >=1.3.0-0
-                #  >1.2.3 => >= 1.2.4-0
+                #  >1 => >=2.0.0
+                #  >1.2 => >=1.3.0
+                #  >1.2.3 => >= 1.2.4
                 gtlt = ">="
-                if xM:
-                    #  not change
-                    pass
-                elif xm:
+                if xm:
                     M = int(M) + 1
                     m = 0
                     p = 0
                 elif xp:
                     m = int(m) + 1
                     p = 0
-            ret = gtlt + str(M) + '.' + str(m) + '.' + str(p) + '-0'
-        elif xM:
-            #  allow any
-            ret = "*"
+            elif gtlt == '<=':
+                # <=0.7.x is actually <0.8.0, since any 0.7.x should
+                # pass.  Similarly, <=7.x is actually <8.0.0, etc.
+                gtlt = '<'
+                if xm:
+                    M = int(M) + 1
+                else:
+                    m = int(m) + 1
+
+            ret = gtlt + str(M) + '.' + str(m) + '.' + str(p)
         elif xm:
-            #  append '-0' onto the version, otherwise
-            #  '1.x.x' matches '2.0.0-beta', since the tag
-            #  *lowers* the version value
-            ret = '>=' + M + '.0.0-0 <' + str(int(M) + 1) + '.0.0-0'
+            ret = '>=' + M + '.0.0 <' + str(int(M) + 1) + '.0.0'
         elif xp:
-            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + str(int(m) + 1) + '.0-0'
+            ret = '>=' + M + '.' + m + '.0 <' + M + '.' + str(int(m) + 1) + '.0'
         logger.debug('xRange return %s', ret)
 
         return ret
