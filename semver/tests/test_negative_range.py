@@ -4,6 +4,20 @@ import pytest
 
 cands = [
     ['1.0.0 - 2.0.0', '2.2.3', False],
+    ['1.2.3+asdf - 2.4.3+asdf', '1.2.3-pre.2', False],
+    ['1.2.3+asdf - 2.4.3+asdf', '2.4.3-alpha', False],
+    ['^1.2.3+build', '2.0.0', False],
+    ['^1.2.3+build', '1.2.0', False],
+    ['^1.2.3', '1.2.3-pre', False],
+    ['^1.2', '1.2.0-pre', False],
+    ['>1.2', '1.3.0-beta', False],
+    ['<=1.2.3', '1.2.3-beta', False],
+    ['^1.2.3', '1.2.3-beta', False],
+    ['=0.7.x', '0.7.0-asdf', False],
+    ['>=0.7.x', '0.7.0-asdf', False],
+    ['1', '1.0.0beta', True],
+    ['<1', '1.0.0beta', True],
+    ['< 1', '1.0.0beta', True],
     ['1.0.0', '1.0.1', False],
     ['>=1.0.0', '0.0.0', False],
     ['>=1.0.0', '0.0.1', False],
@@ -43,21 +57,22 @@ cands = [
     ['>=1.2', '1.1.1', False],
     ['1', '2.0.0beta', True],
     ['~v0.5.4-beta', '0.5.4-alpha', False],
-    ['<1', '1.0.0beta', True],
-    ['< 1', '1.0.0beta', True],
     ['=0.7.x', '0.8.2', False],
     ['>=0.7.x', '0.6.2', False],
-    ['<=0.7.x', '0.7.2', False],
+    ['<0.7.x', '0.7.2', False],
     ['<1.2.3', '1.2.3-beta', False],
     ['=1.2.3', '1.2.3-beta', False],
     ['>1.2', '1.2.8', False],
+    ['^0.0.1', '0.0.2', False],
     ['^1.2.3', '2.0.0-alpha', False],
     ['^1.2.3', '1.2.2', False],
     ['^1.2', '1.1.9', False],
+    ['*', 'v1.2.3-foo', True],
     # invalid ranges never satisfied!
     ['blerg', '1.2.3', False],
-    ['git+https://user:password0123@github.com/foo', '123.0.0', True],
-    ['^1.2.3', '2.0.0-pre', False]
+    ['git+https: #user:password0123@github.com/foo', '123.0.0', True],
+    ['^1.2.3', '2.0.0-pre', False],
+    ['^1.2.3', False, False]
 ]
 
 

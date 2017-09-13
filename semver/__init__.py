@@ -947,7 +947,7 @@ def test_set(set_, version):
     return True
 
 
-def satisfies(version, range_, loose):
+def satisfies(version, range_, loose=False):
     try:
         range_ = make_range(range_, loose)
     except Exception as e:
@@ -955,7 +955,7 @@ def satisfies(version, range_, loose):
     return range_.test(version)
 
 
-def max_satisfying(versions, range_, loose):
+def max_satisfying(versions, range_, loose=False):
     try:
         range_ob = make_range(range_, loose=loose)
     except:
