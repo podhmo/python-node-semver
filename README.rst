@@ -1,6 +1,9 @@
 semver
 =================
 
+.. image:: https://travis-ci.org/podhmo/python-semver.svg?branch=master
+    :target: https://travis-ci.org/podhmo/python-semver
+
 python version of [node-semver](https://github.com/isaacs/node-semver)
 
 .. code:: python
