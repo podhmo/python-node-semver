@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-
 import pytest
 # node-semver/test/index.js
-# import logging
-# logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 cands = [
     [['1.2.3', '1.2.4'], '1.2', '1.2.4', False],

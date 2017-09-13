@@ -1,12 +1,10 @@
 # -*- coding:utf-8 -*-
 import pytest
 # node-semver/test/index.js
-# import logging
-# logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 # // validRange(range) -> result
 # // translate ranges into their canonical form
-cands =   [
+cands =  [
     ['1.0.0 - 2.0.0', '>=1.0.0 <=2.0.0', False],
     ['1.0.0', '1.0.0', False],
     ['>=*', '>=0.0.0-0', False],
@@ -81,15 +79,8 @@ cands =   [
     ['^ 1.2 ^ 1', '>=1.2.0-0 <2.0.0-0 >=1.0.0-0 <2.0.0-0', False]
 ]
 
-# cands =   [
-#     ['^0.0.1', '=0.0.1', False],
-# ]
-
 
 @pytest.mark.parametrize("pre, wanted, loose", cands)
 def test_it(pre, wanted, loose):
     from semver import valid_range
     assert valid_range(pre, loose) == wanted
-
-
-

@@ -103,7 +103,7 @@ def test_lte(v0, v1, loose):
     assert (lte(v0, v1, loose)) is True
 
 """
-   var v0 = v[0];
+    var v0 = v[0];
     var v1 = v[1];
     var loose = v[2];
     t.ok(gt(v0, v1, loose), "gt('" + v0 + "', '" + v1 + "')");
@@ -117,4 +117,4 @@ def test_lte(v0, v1, loose):
     t.ok(cmp(v0, '>=', v1, loose), "cmp('" + v0 + "' >= '" + v1 + "')");
     t.ok(cmp(v1, '<=', v0, loose), "cmp('" + v1 + "' <= '" + v0 + "')");
     t.ok(cmp(v0, '!=', v1, loose), "cmp('" + v0 + "' != '" + v1 + "')");
- """
+"""

@@ -1,12 +1,10 @@
 # -*- coding:utf-8 -*-
 import pytest
 # node-semver/test/index.js
-# import logging
-# logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 # // [range, comparators]
 # // turn range into a set of individual comparators
-cands =   [
+cands = [
     ['1.0.0 - 2.0.0', [['>=1.0.0', '<=2.0.0']]],
     ['1.0.0', [['1.0.0']]],
     ['>=*', [['>=0.0.0-0']]],
@@ -81,6 +79,3 @@ def test_it(pre, wanted):
     from semver import to_comparators
     loose = False
     assert to_comparators(pre, loose) == wanted
-
-
-
