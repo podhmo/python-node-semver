@@ -36,7 +36,7 @@ class PyTest(TestCommand):
 
 setup(
     name='semver',
-    version='0.1',
+    version='0.2.0',
     description='port of node-semver',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
@@ -45,10 +45,10 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
     ],
     keywords='version semver',
-    author="",
-    author_email="",
+    author="podhmo",
+    author_email="ababjam61+github@gmail.com",
     url="https://github.com/podhmo/python-semver",
-    packages=find_packages(),
+    packages=find_packages(exclude=["semver.tests"]),
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,
