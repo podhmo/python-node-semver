@@ -952,17 +952,18 @@ def satisfies(version, range_, loose):
 
 
 def max_satisfying(versions, range_, loose):
-    xs = [version for version in versions if satisfies(version, range_, loose)]
-    if len(xs) <= 0:
+    try:
+        range_ob = make_range(range_, loose=loose)
+    except:
         return None
-    selected = xs[0]
-    for x in xs[1:]:
-        try:
-            if rcompare(selected, x, loose) == 1:
-                selected = x
-        except ValueError:
-            logger.warn("{} is invalud version".format(x))
-    return selected
+    max_ = None
+    max_sv = None
+    for v in versions:
+        if range_ob.test(v):  # satisfies(v, range_, loose=loose)
+            if max_ is None or max_sv.compare(v) == -1:  # compare(max, v, true)
+                max_ = v
+                max_sv = make_semver(max_, loose=loose)
+    return max_
 
 
 def valid_range(range_, loose):
