@@ -640,7 +640,7 @@ class Range(object):
         #  First, split based on boolean or ||
         self.raw = range_
         xs = [self.parse_range(r.strip()) for r in re.split(r"\s*\|\|\s*", range_)]
-        self.set = [r for r in xs if len(r) >= 0]
+        self.set = [r for r in xs if r]
 
         if not len(self.set):
             raise ValueError("Invalid SemVer Range: {}".format(range_))

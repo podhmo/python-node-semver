@@ -54,7 +54,8 @@ cands = [
     ['^1.2.3', '2.0.0-alpha', False],
     ['^1.2.3', '1.2.2', False],
     ['^1.2', '1.1.9', False],
-    ['blerg', '1.2.3', False],  # invalid ranges never satisfied!
+    # invalid ranges never satisfied!
+    ['blerg', '1.2.3', False],
     ['git+https://user:password0123@github.com/foo', '123.0.0', True],
     ['^1.2.3', '2.0.0-pre', False]
 ]
