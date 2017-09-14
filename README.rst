@@ -6,7 +6,17 @@ semver
 
 python version of [node-semver](https://github.com/isaacs/node-semver)
 
-.. code:: python
+install
+----------------------------------------
+
+.. code-block:: console
+
+   pip install node-semver
+
+examples
+----------------------------------------
+
+.. code-block:: python
 
    # -*- coding:utf-8 -*-
    from semver import max_satisfying
