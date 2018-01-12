@@ -526,13 +526,57 @@ def rcompare(a, b, loose):
     return compare(b, a, loose)
 
 
+def _prerelease_key(prerelease):
+    """Sort key for prereleases.
+
+    Precedence for two pre-release versions with the same
+    major, minor, and patch version MUST be determined by
+    comparing each dot separated identifier from left to
+    right until a difference is found as follows:
+    identifiers consisting of only digits are compare
+    numerically and identifiers with letters or hyphens
+    are compared lexically in ASCII sort order. Numeric
+    identifiers always have lower precedence than non-
+    numeric identifiers. A larger set of pre-release
+    fields has a higher precedence than a smaller set,
+    if all of the preceding identifiers are equal.
+    """
+    for entry in prerelease:
+        if isinstance(entry, int):
+            # Assure numerics always sort before string
+            yield ('', entry)
+        else:
+            # Use ASCII compare:
+            yield (entry,)
+
+
+def make_key_function(loose):
+    def key_function(version):
+        v = make_semver(version, loose)
+        key = (v.major, v.minor, v.patch)
+        if v.prerelease:
+            key = key + (0,) + tuple(_prerelease_key(
+                v.prerelease))
+        else:
+            #  NOT having a prerelease is > having one
+            key = key + (1,)
+
+        return key
+    return key_function
+
+loose_key_function = make_key_function(True)
+full_key_function = make_key_function(True)
+
+
 def sort(list, loose):
-    list.sort(lambda a, b: compare(a, b, loose))
+    keyf = loose_key_function if loose else full_key_function
+    list.sort(key=keyf)
     return list
 
 
 def rsort(list, loose):
-    list.sort(lambda a, b: rcompare(a, b, loose))
+    keyf = loose_key_function if loose else full_key_function
+    list.sort(key=keyf, reverse=True)
     return list
 
 
