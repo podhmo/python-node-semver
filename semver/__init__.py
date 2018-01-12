@@ -550,7 +550,7 @@ def _prerelease_key(prerelease):
             yield (entry,)
 
 
-def make_key_function(loose):
+def _make_key_function(loose):
     def key_function(version):
         v = make_semver(version, loose)
         key = (v.major, v.minor, v.patch)
@@ -564,8 +564,8 @@ def make_key_function(loose):
         return key
     return key_function
 
-loose_key_function = make_key_function(True)
-full_key_function = make_key_function(True)
+loose_key_function = _make_key_function(True)
+full_key_function = _make_key_function(True)
 
 
 def sort(list, loose):
