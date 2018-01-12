@@ -565,7 +565,7 @@ def _make_key_function(loose):
     return key_function
 
 loose_key_function = _make_key_function(True)
-full_key_function = _make_key_function(True)
+full_key_function = _make_key_function(False)
 
 
 def sort(list, loose):
