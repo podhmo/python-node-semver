@@ -1,1 +1,4 @@
+0.3.0
 
+- drop python2.x support
+- bug fix, Add sort key function #14

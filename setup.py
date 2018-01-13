@@ -36,7 +36,7 @@ class PyTest(TestCommand):
 
 setup(
     name='node-semver',
-    version='0.2.0',
+    version='0.3.0',
     description='port of node-semver',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
