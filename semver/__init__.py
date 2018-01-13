@@ -287,8 +287,8 @@ def semver(version, loose):
             return version
         else:
             version = version.version
-    elif not isinstance(version, str):  # xxx:
-        raise ValueError("Invalid Version: {}".format(version))
+    elif not isinstance(version, str) and not isinstance(version, unicode):  # xxx:
+        raise ValueError("Unexpected type: {}".format(type(version)))
 
     """
     if (!(this instanceof SemVer))
