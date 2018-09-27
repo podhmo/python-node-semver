@@ -305,6 +305,7 @@ class SemVer(object):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
         self.raw = version
+        self.micro_versions = []
 
         m = regexp[LOOSE if loose else FULL].search(version.strip())
         if not m:
@@ -315,7 +316,16 @@ class SemVer(object):
             self.minor = int(m.group(2)) if m.group(2) else 0
             self.patch = 0
             if not m.group(3):
-                self.prerelease = []
+                self.prerelease = [
+                    (int(id) if NUMERIC.search(id) else id) for id in version.strip()[m.end():].split(".") if id
+                ]
+                # this is not same behaviour for node's semver (see: https://github.com/podhmo/python-semver/issues/15)
+                if self.prerelease and isinstance(self.prerelease[0], int):
+                    self.patch = self.prerelease[0]
+                    self.prerelease = self.prerelease[1:]
+                    if all(isinstance(id, int) for id in self.prerelease):
+                        self.micro_versions = self.prerelease
+                        self.prerelease = []
             else:
                 self.prerelease = [(int(id) if NUMERIC.search(id) else id)
                                    for id in m.group(3).split(".")]
@@ -554,6 +564,8 @@ def _make_key_function(loose):
     def key_function(version):
         v = make_semver(version, loose)
         key = (v.major, v.minor, v.patch)
+        if v.micro_versions:
+            key = key + v.micro_versions
         if v.prerelease:
             key = key + (0,) + tuple(_prerelease_key(
                 v.prerelease))
