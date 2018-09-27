@@ -319,6 +319,7 @@ class SemVer(object):
                 self.prerelease = [
                     (int(id) if NUMERIC.search(id) else id) for id in version.strip()[m.end():].split(".") if id
                 ]
+                # this is not same behaviour for node's semver (see: https://github.com/podhmo/python-semver/issues/15)
                 if self.prerelease and isinstance(self.prerelease[0], int):
                     self.patch = self.prerelease[0]
                     self.prerelease = self.prerelease[1:]
