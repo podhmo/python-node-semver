@@ -278,7 +278,7 @@ def clean(version, loose):
         return None
 
 
-NUMERIC = re.compile("^\d+$")
+NUMERIC = re.compile(r"^\d+$")
 
 
 def semver(version, loose):
@@ -744,7 +744,7 @@ class Range(object):
         range_ = regexp[CARETTRIM].sub(caretTrimReplace, range_)
 
         #  normalize spaces
-        range_ = " ".join(re.split("\s+", range_))
+        range_ = " ".join(re.split(r"\s+", range_))
 
         #  At this point, the range is completely trimmed and
         #  ready to be split into comparators.
@@ -752,7 +752,7 @@ class Range(object):
             comp_re = regexp[COMPARATORLOOSE]
         else:
             comp_re = regexp[COMPARATOR]
-        set_ = re.split("\s+", ' '.join([parse_comparator(comp, loose) for comp in range_.split(" ")]))
+        set_ = re.split(r"\s+", ' '.join([parse_comparator(comp, loose) for comp in range_.split(" ")]))
         if self.loose:
             # in loose mode, throw out any that are not valid comparators
             set_ = [comp for comp in set_ if comp_re.search(comp)]
@@ -808,7 +808,7 @@ def is_x(id):
 
 def replace_tildes(comp, loose):
     return " ".join([replace_tilde(c, loose)
-                     for c in re.split("\s+", comp.strip())])
+                     for c in re.split(r"\s+", comp.strip())])
 
 
 def replace_tilde(comp, loose):
@@ -849,7 +849,7 @@ def replace_tilde(comp, loose):
 #  ^1.2.0 --> >=1.2.0 <2.0.0
 def replace_carets(comp, loose):
     return " ".join([replace_caret(c, loose)
-                     for c in re.split("\s+", comp.strip())])
+                     for c in re.split(r"\s+", comp.strip())])
 
 
 def replace_caret(comp, loose):
@@ -900,7 +900,7 @@ def replace_caret(comp, loose):
 def replace_xranges(comp, loose):
     logger.debug('replaceXRanges %s %s', comp, loose)
     return " ".join([replace_xrange(c, loose)
-                     for c in re.split("\s+", comp.strip())])
+                     for c in re.split(r"\s+", comp.strip())])
 
 
 def replace_xrange(comp, loose):
