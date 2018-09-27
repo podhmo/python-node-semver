@@ -301,7 +301,7 @@ make_semver = semver
 
 
 class SemVer(object):
-    def __init__(self, version, loose, sep_rx=re.compile(r"[\.\-_]")):
+    def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
         self.raw = version
@@ -317,7 +317,7 @@ class SemVer(object):
             self.patch = 0
             if not m.group(3):
                 self.prerelease = [
-                    (int(id) if NUMERIC.search(id) else id) for id in sep_rx.split(version.strip()[m.end():]) if id
+                    (int(id) if NUMERIC.search(id) else id) for id in version.strip()[m.end():].split(".") if id
                 ]
                 if self.prerelease and isinstance(self.prerelease[0], int):
                     self.patch = self.prerelease[0]
