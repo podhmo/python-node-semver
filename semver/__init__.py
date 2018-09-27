@@ -562,7 +562,9 @@ def _prerelease_key(prerelease):
 def _make_key_function(loose):
     def key_function(version):
         v = make_semver(version, loose)
-        key = (v.major, v.minor, v.patch, *v.micro_versions)
+        key = (v.major, v.minor, v.patch)
+        if v.micro_versions:
+            key = key + v.micro_versions
         if v.prerelease:
             key = key + (0,) + tuple(_prerelease_key(
                 v.prerelease))
