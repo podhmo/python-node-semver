@@ -326,9 +326,8 @@ class SemVer(object):
                         self.micro_versions = self.prerelease
                         self.prerelease = []
             else:
-                self.prerelease = [
-                    (int(id) if NUMERIC.search(id) else id) for id in m.group(3).split(".")
-                ]
+                self.prerelease = [(int(id) if NUMERIC.search(id) else id)
+                                   for id in m.group(3).split(".")]
         else:
             #  these are actually numbers
             self.major = int(m.group(1))
