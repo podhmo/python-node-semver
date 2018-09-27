@@ -352,6 +352,8 @@ class SemVer(object):
         self.version = "{}.{}.{}".format(self.major, self.minor, self.patch)
         if len(self.prerelease) > 0:
             self.version += ("-{}".format(".".join(str(v) for v in self.prerelease)))
+        elif self.micro_versions:
+            self.version += ".{}".format(".".join(str(v) for v in self.micro_versions))
         return self.version
 
     def __repr__(self):
