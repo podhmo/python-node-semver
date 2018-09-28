@@ -306,6 +306,7 @@ class SemVer(object):
         self.loose = loose
         self.raw = version
         self.micro_versions = []
+        self.build = []
 
         m = regexp[LOOSE if loose else FULL].search(version.strip())
         if not m:
@@ -343,8 +344,6 @@ class SemVer(object):
                                    for id in m.group(4).split(".")]
             if m.group(5):
                 self.build = m.group(5).split(".")
-            else:
-                self.build = []
 
         self.format()  # xxx:
 
