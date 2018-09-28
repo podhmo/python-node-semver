@@ -11,7 +11,8 @@ cands = [
             "build": [],
             "micro_versions": [],
         }
-    ), (
+    ),
+    (
         "4.1.3+jenkins", True, {
             "major": 4,
             "minor": 1,
@@ -20,7 +21,8 @@ cands = [
             "build": ["jenkins"],
             "micro_versions": [],
         }
-    ), (
+    ),
+    (
         "4.1.3-pre", True, {
             "major": 4,
             "minor": 1,
@@ -60,7 +62,37 @@ cands = [
             "build": [],
             "micro_versions": [2],
         }
-    )
+    ),
+    (
+        "4.1.3.2-pre2", True, {
+            "major": 4,
+            "minor": 1,
+            "patch": 3,
+            "prerelease": ["pre2"],
+            "build": [],
+            "micro_versions": [2],
+        }
+    ),
+    (
+        "4.1.3.2-pre.2", True, {
+            "major": 4,
+            "minor": 1,
+            "patch": 3,
+            "prerelease": ["pre"],
+            "build": [],
+            "micro_versions": [2, 2],
+        }
+    ),
+    (
+        "4.1.3.2-pre.2+xxx", True, {
+            "major": 4,
+            "minor": 1,
+            "patch": 3,
+            "prerelease": ["pre"],
+            "build": ["xxx"],
+            "micro_versions": [2, 2],
+        }
+    ),
 ]
 
 
