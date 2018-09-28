@@ -317,16 +317,29 @@ class SemVer(object):
             self.minor = int(m.group(2)) if m.group(2) else 0
             self.patch = 0
             if not m.group(3):
-                self.prerelease = [
-                    (int(id) if NUMERIC.search(id) else id) for id in version.strip()[m.end():].split(".") if id
-                ]
-                # this is not same behaviour for node's semver (see: https://github.com/podhmo/python-semver/issues/15)
-                if self.prerelease and isinstance(self.prerelease[0], int):
-                    self.patch = self.prerelease[0]
+                # this is not same behaviour  node's semver (see: https://github.com/podhmo/python-semver/issues/15)
+                self.prerelease = [id for id in version.strip()[m.end():].split(".") if id]
+                if self.prerelease and NUMERIC.search(self.prerelease[0]):
+                    self.patch = int(self.prerelease[0])
                     self.prerelease = self.prerelease[1:]
-                    if all(isinstance(id, int) for id in self.prerelease):
-                        self.micro_versions = self.prerelease
-                        self.prerelease = []
+
+                prerelease = []
+                for id in self.prerelease:
+                    if "-" in id:
+                        other = prerelease
+                        ks = id.split("-")
+                    elif "+" in id:
+                        other = self.build
+                        ks = id.split("+")
+                    else:
+                        ks = [id]
+                    for k in ks:
+                        if NUMERIC.search(k):
+                            self.micro_versions.append(int(k))
+                        else:
+                            other.append(k)
+                self.prerelease = prerelease
+                self.prerelease = [(int(id) if NUMERIC.search(id) else id)for id in self.prerelease]
             else:
                 self.prerelease = [(int(id) if NUMERIC.search(id) else id)
                                    for id in m.group(3).split(".")]
