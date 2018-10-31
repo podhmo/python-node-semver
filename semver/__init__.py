@@ -785,7 +785,7 @@ class Range(object):
         set_ = [make_comparator(comp, loose) for comp in set_]
         return set_
 
-    def test(self, version):
+    def test(self, version, include_prerelease=False):
         if not version:  # xxx
             return False
 
@@ -793,7 +793,7 @@ class Range(object):
             version = make_semver(version, loose=self.loose)
 
         for e in self.set:
-            if test_set(e, version):
+            if test_set(e, version, include_prerelease=include_prerelease):
                 return True
         return False
 
@@ -1033,11 +1033,11 @@ def hyphen_replace(mob):
     return (from_ + ' ' + to).strip()
 
 
-def test_set(set_, version):
+def test_set(set_, version,  include_prerelease=False):
     for e in set_:
         if not e.test(version):
             return False
-    if len(version.prerelease) > 0:
+    if len(version.prerelease) > 0 and not include_prerelease:
         # Find the set of versions that are allowed to have prereleases
         # For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
         # That should allow `1.2.3-pr.2` to pass.
@@ -1055,15 +1055,15 @@ def test_set(set_, version):
     return True
 
 
-def satisfies(version, range_, loose=False):
+def satisfies(version, range_, loose=False, include_prerelease=False):
     try:
         range_ = make_range(range_, loose)
     except Exception as e:
         return False
-    return range_.test(version)
+    return range_.test(version, include_prerelease=include_prerelease)
 
 
-def max_satisfying(versions, range_, loose=False):
+def max_satisfying(versions, range_, loose=False, include_prerelease=False):
     try:
         range_ob = make_range(range_, loose=loose)
     except:
@@ -1071,7 +1071,7 @@ def max_satisfying(versions, range_, loose=False):
     max_ = None
     max_sv = None
     for v in versions:
-        if range_ob.test(v):  # satisfies(v, range_, loose=loose)
+        if range_ob.test(v, include_prerelease=include_prerelease):  # satisfies(v, range_, loose=loose)
             if max_ is None or max_sv.compare(v) == -1:  # compare(max, v, true)
                 max_ = v
                 max_sv = make_semver(max_, loose=loose)
