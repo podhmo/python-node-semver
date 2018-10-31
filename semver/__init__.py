@@ -793,7 +793,7 @@ class Range(object):
             version = make_semver(version, loose=self.loose)
 
         for e in self.set:
-            if test_set(e, version, include_prerelease):
+            if test_set(e, version, include_prerelease=include_prerelease):
                 return True
         return False
 
@@ -1060,7 +1060,7 @@ def satisfies(version, range_, loose=False, include_prerelease=False):
         range_ = make_range(range_, loose)
     except Exception as e:
         return False
-    return range_.test(version, include_prerelease)
+    return range_.test(version, include_prerelease=include_prerelease)
 
 
 def max_satisfying(versions, range_, loose=False, include_prerelease=False):
@@ -1071,7 +1071,7 @@ def max_satisfying(versions, range_, loose=False, include_prerelease=False):
     max_ = None
     max_sv = None
     for v in versions:
-        if range_ob.test(v, include_prerelease):  # satisfies(v, range_, loose=loose)
+        if range_ob.test(v, include_prerelease=include_prerelease):  # satisfies(v, range_, loose=loose)
             if max_ is None or max_sv.compare(v) == -1:  # compare(max, v, true)
                 max_ = v
                 max_sv = make_semver(max_, loose=loose)
