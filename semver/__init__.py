@@ -301,6 +301,8 @@ make_semver = semver
 
 
 class SemVer(object):
+    # major, minor, patch, prerelease, build, micro_version
+
     def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
@@ -332,10 +334,13 @@ class SemVer(object):
                         other = self.build
                         ks = id.split("+")
                     else:
+                        other = None
                         ks = [id]
                     for k in ks:
                         if NUMERIC.search(k):
                             self.micro_versions.append(int(k))
+                        elif other is None:
+                            raise ValueError("Invalid Version: {}".format(version))
                         else:
                             other.append(k)
                 self.prerelease = prerelease
