@@ -314,7 +314,11 @@ class SemVer(object):
         if not m:
             if not loose:
                 raise ValueError("Invalid Version: {}".format(version))
+            if not hasattr(version, "strip"):
+                raise ValueError("Invalid Version: {}".format(version))
             m = regexp[RECOVERYVERSIONNAME].search(version.strip())
+            if m is None:
+                raise ValueError("Invalid Version: {}".format(version))
             self.major = int(m.group(1)) if m.group(1) else 0
             self.minor = int(m.group(2)) if m.group(2) else 0
             self.patch = 0
