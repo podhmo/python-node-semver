@@ -301,6 +301,8 @@ make_semver = semver
 
 
 class SemVer(object):
+    # major, minor, patch, prerelease, build, micro_version
+
     def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
@@ -312,7 +314,11 @@ class SemVer(object):
         if not m:
             if not loose:
                 raise ValueError("Invalid Version: {}".format(version))
+            if not hasattr(version, "strip"):
+                raise ValueError("Invalid Version: {}".format(version))
             m = regexp[RECOVERYVERSIONNAME].search(version.strip())
+            if m is None:
+                raise ValueError("Invalid Version: {}".format(version))
             self.major = int(m.group(1)) if m.group(1) else 0
             self.minor = int(m.group(2)) if m.group(2) else 0
             self.patch = 0
@@ -332,10 +338,13 @@ class SemVer(object):
                         other = self.build
                         ks = id.split("+")
                     else:
+                        other = None
                         ks = [id]
                     for k in ks:
                         if NUMERIC.search(k):
                             self.micro_versions.append(int(k))
+                        elif other is None:
+                            raise ValueError("Invalid Version: {}".format(version))
                         else:
                             other.append(k)
                 self.prerelease = prerelease
