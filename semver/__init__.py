@@ -316,7 +316,7 @@ class SemVer(object):
                 raise ValueError("Invalid Version: {}".format(version))
             if not hasattr(version, "strip"):
                 raise ValueError("Invalid Version: {}".format(version))
-            m = regexp[RECOVERYVERSIONNAME].search(version.strip())
+            m = regexp[RECOVERYVERSIONNAME].match(version.strip())
             if m is None:
                 raise ValueError("Invalid Version: {}".format(version))
             self.major = int(m.group(1)) if m.group(1) else 0

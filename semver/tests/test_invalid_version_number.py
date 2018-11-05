@@ -9,6 +9,7 @@ cands = [
     ("1.2", False, ValueError),
     ("1.a.2", False, ValueError),
     (None, False, ValueError),
+    ('X.2', False, ValueError),
     ('Infinity.NaN.Infinity', False, ValueError),
     ('1.2.3.4', True, None),
     ('NOT VALID', True, ValueError),
@@ -17,6 +18,7 @@ cands = [
     ("1.a.2", True, ValueError),
     (None, True, ValueError),
     ('Infinity.NaN.Infinity', True, ValueError),
+    ('X.2', True, ValueError),
 ]
 
 
