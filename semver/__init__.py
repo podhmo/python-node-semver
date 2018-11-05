@@ -345,7 +345,7 @@ class SemVer(object):
                             self.micro_versions.append(int(k))
                         elif other is None:
                             raise ValueError("Invalid Version: {}".format(version))
-                        else:
+                        elif other is not None:
                             other.append(k)
                 self.prerelease = prerelease
                 self.prerelease = [(int(id) if NUMERIC.search(id) else id)for id in self.prerelease]
