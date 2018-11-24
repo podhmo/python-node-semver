@@ -1,10 +1,14 @@
 # -*- coding:utf-8 -*-
 import logging
 import re
+
+
 logger = logging.getLogger(__name__)
-
-
 SEMVER_SPEC_VERSION = '2.0.0'
+
+
+class InvalidTypeIncluded(ValueError):
+    pass
 
 
 class _R(object):
@@ -288,7 +292,7 @@ def semver(version, loose):
         else:
             version = version.version
     elif not isinstance(version, str):  # xxx:
-        raise ValueError("Invalid Version: {}".format(version))
+        raise InvalidTypeIncluded("must be str, but {!r}".format(version))
 
     """
     if (!(this instanceof SemVer))
@@ -518,8 +522,8 @@ class SemVer(object):
 def inc(version, release, loose, identifier=None):  # wow!
     try:
         return make_semver(version, loose).inc(release, identifier=identifier).version
-    except Exception as e:
-        logger.debug(e, exc_info=5)
+    except ValueError as e:
+        logger.info(e, exc_info=2)
         return None
 
 
@@ -726,6 +730,8 @@ class Comparator(object):
 def make_range(range_, loose):
     if isinstance(range_, Range) and range_.loose == loose:
         return range_
+    elif not isinstance(range_, str):  # xxx:
+        raise InvalidTypeIncluded("must be str, but {!r}".format(range_))
 
     # if (!(this instanceof Range))
     #    return new Range(range, loose);
@@ -1067,7 +1073,10 @@ def test_set(set_, version,  include_prerelease=False):
 def satisfies(version, range_, loose=False, include_prerelease=False):
     try:
         range_ = make_range(range_, loose)
-    except Exception as e:
+    except InvalidTypeIncluded:
+        raise
+    except ValueError as e:
+        logger.info(e, exc_info=2)
         return False
     return range_.test(version, include_prerelease=include_prerelease)
 
@@ -1075,7 +1084,10 @@ def satisfies(version, range_, loose=False, include_prerelease=False):
 def max_satisfying(versions, range_, loose=False, include_prerelease=False):
     try:
         range_ob = make_range(range_, loose=loose)
-    except:
+    except InvalidTypeIncluded:
+        raise
+    except ValueError as e:
+        logger.info(e, exc_info=2)
         return None
     max_ = None
     max_sv = None
@@ -1092,7 +1104,10 @@ def valid_range(range_, loose):
         #  Return '*' instead of '' so that truthiness works.
         #  This will throw if it's invalid anyway
         return make_range(range_, loose).range or "*"
-    except:
+    except TypeError as e:
+        raise InvalidTypeIncluded("{} (range_={!r}".format(e, range_))
+    except ValueError as e:
+        logger.info(e, exc_info=2)
         return None
 
 

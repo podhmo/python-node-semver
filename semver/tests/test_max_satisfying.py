@@ -27,4 +27,4 @@ def test_it(versions, range_, expect, loose, include_prerelease):
         with pytest.raises(expect):
             max_satisfying(versions, range_, loose, include_prerelease)
     else:
-      assert max_satisfying(versions, range_, loose, include_prerelease) == expect
+        assert max_satisfying(versions, range_, loose, include_prerelease) == expect
