@@ -19,9 +19,9 @@ def test_max_satisfying():
 
 
 def test_satisfies():
-    def _callFUT(versions, range_):
+    def _callFUT(version, range_):
         from semver import satisfies
-        satisfies(versions, range_)
+        satisfies(version, range_)
 
     from semver import InvalidTypeIncluded
     with pytest.raises(InvalidTypeIncluded):
