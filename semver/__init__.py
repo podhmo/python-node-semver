@@ -733,11 +733,11 @@ def make_range(range_, loose):
 
 
 class Range(object):
-    def __init__(self, range_, loose):
+    def __init__(self, range_, loose, _split_rx=re.compile(r"\s*\|\|\s*")):
         self.loose = loose
         #  First, split based on boolean or ||
         self.raw = range_
-        xs = [self.parse_range(r.strip()) for r in re.split(r"\s*\|\|\s*", range_)]
+        xs = [self.parse_range(r.strip()) for r in _split_rx.split(range_)]
         self.set = [r for r in xs if r]
 
         if not len(self.set):
