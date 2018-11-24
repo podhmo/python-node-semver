@@ -1,3 +1,7 @@
+0.6.0
+
+- more strict error handling (InvalidTypeIncluded is added)
+
 0.5.1
 
 - bug fix
