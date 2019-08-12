@@ -1,3 +1,7 @@
+0.7.0
+
+Include tests in source distributions (#31)
+
 0.6.0
 
 - more strict error handling (InvalidTypeIncluded is added)
