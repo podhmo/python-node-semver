@@ -1,0 +1,4 @@
+graft examples
+graft semver/tests
+global-exclude __pycache__
+global-exclude *.py[co]
