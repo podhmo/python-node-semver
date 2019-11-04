@@ -1099,6 +1099,24 @@ def max_satisfying(versions, range_, loose=False, include_prerelease=False):
     return max_
 
 
+def min_satisfying(versions, range_, loose=False, include_prerelease=False):
+    try:
+        range_ob = make_range(range_, loose=loose)
+    except InvalidTypeIncluded:
+        raise
+    except ValueError as e:
+        logger.info(e, exc_info=2)
+        return None
+    min_ = None
+    min_sv = None
+    for v in versions:
+        if range_ob.test(v, include_prerelease=include_prerelease):  # satisfies(v, range_, loose=loose)
+            if min_ is None or min_sv.compare(v) == 1:  # compare(min, v, true)
+                min_ = v
+                min_sv = make_semver(min_, loose=loose)
+    return min_
+
+
 def valid_range(range_, loose):
     try:
         #  Return '*' instead of '' so that truthiness works.
