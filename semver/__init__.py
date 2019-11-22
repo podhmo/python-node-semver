@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import logging
 import re
+from functools import cmp_to_key
 
 
 logger = logging.getLogger(__name__)
@@ -1176,3 +1177,9 @@ def outside(version, range_, hilo, loose):
     elif low.operator == ecomp and ltfn(version, low.semver):
         return False
     return True
+
+
+# helpers
+def _sorted(versions, loose=False, key=None):
+    key = key or cmp_to_key(lambda x, y: x.compare(y))
+    return sorted([make_semver(v, loose=loose) for v in versions], key=key)

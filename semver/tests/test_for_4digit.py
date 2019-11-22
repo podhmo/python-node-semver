@@ -107,3 +107,21 @@ def test_parse(v, loose, expected):
     assert got.prerelease == expected["prerelease"]
     assert got.build == expected["build"]
     assert got.micro_versions == expected["micro_versions"]
+
+
+def test_sorted():
+    from semver import _sorted
+
+    v1 = "1.1"
+    v2 = "1.1.1"
+    v3 = "1.1.1-pre1"
+    v4 = "1.1.1.1"
+    v5 = "1.1.1.2"
+
+    versions = [v1, v2, v3, v4, v5]
+    rversions = list(reversed(versions))
+
+    got = [v.raw for v in _sorted(versions, loose=True)]
+    rgot = [v.raw for v in _sorted(rversions, loose=True)]
+    assert got == rgot
+    assert got == ['1.1', '1.1.1-pre1', '1.1.1', '1.1.1.1', '1.1.1.2']
