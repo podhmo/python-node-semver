@@ -10,8 +10,8 @@ cands = [
 ]
 
 
-@pytest.mark.skip(reason="not implemented yet")
-# @pytest.mark.parametrize("versions, range_, expect, loose", cands)
+
+@pytest.mark.parametrize("versions, range_, expect, loose", cands)
 def test_it(versions, range_, expect, loose):
     from semver import min_satisfying
     assert min_satisfying(versions, range_, loose) == expect
