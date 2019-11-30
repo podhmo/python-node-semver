@@ -18,7 +18,6 @@ examples
 
 .. code-block:: python
 
-   # -*- coding:utf-8 -*-
    from semver import max_satisfying
 
    versions = ['1.2.3', '1.2.4', '1.2.5', '1.2.6', '2.0.1']
