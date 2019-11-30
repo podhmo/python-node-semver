@@ -1,6 +1,10 @@
+0.8.0
+
+- handle 4-digit version correctly (#35)
+
 0.7.0
 
-Include tests in source distributions (#31)
+- include tests in source distributions (#31)
 
 0.6.0
 
