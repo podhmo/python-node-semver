@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import logging
 import re
+from functools import cmp_to_key
 
 
 logger = logging.getLogger(__name__)
@@ -391,7 +392,7 @@ class SemVer(object):
         logger.debug('SemVer.compare %s %s %s', self.version, self.loose, other)
         if not isinstance(other, SemVer):
             other = make_semver(other, self.loose)
-        result = self.compare_main(other) or self.compare_pre(other)
+        result = self.compare_main(other) or self.compare_pre(other) or self.compare_micro(other)
         logger.debug("compare result %s", result)
         return result
 
@@ -434,6 +435,11 @@ class SemVer(object):
                 continue
             else:
                 return compare_identifiers(str(a), str(b))
+
+    def compare_micro(self, other):
+        if self.micro_versions == other.micro_versions:
+            return 0
+        return -1 if  self.micro_versions < other.micro_versions else 1
 
     def inc(self, release, identifier=None):
         logger.debug("inc release %s %s", self.prerelease, release)
@@ -1189,3 +1195,9 @@ def outside(version, range_, hilo, loose):
     elif low.operator == ecomp and ltfn(version, low.semver):
         return False
     return True
+
+
+# helpers
+def _sorted(versions, loose=False, key=None):
+    key = key or cmp_to_key(lambda x, y: x.compare(y))
+    return sorted([make_semver(v, loose=loose) for v in versions], key=key)
