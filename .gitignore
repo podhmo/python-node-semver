@@ -12,6 +12,7 @@ bin/
 build/
 develop-eggs/
 dist/
+deb_dist/
 eggs/
 lib/
 lib64/
@@ -21,6 +22,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+VERSION
 
 # Installer logs
 pip-log.txt
@@ -41,6 +43,7 @@ coverage.xml
 .mr.developer.cfg
 .project
 .pydevproject
+.vscode
 
 # Rope
 .ropeproject
