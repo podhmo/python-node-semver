@@ -1,0 +1,7 @@
+Версия: semver-${FILE,path="VERSION"}
+Автор: Aleksei Badyaev <aleksei.badiaev@mousesoft.site>
+Сборка: ${BUILD_NUMBER}
+Ветка: ${GIT_BRANCH}
+Ревизия: ${GIT_REVISION}
+
+python version of node-semver - https://github.com/isaacs/node-semver

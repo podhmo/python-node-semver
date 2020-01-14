@@ -1,0 +1,13 @@
+{
+    "files": [
+        {   "pattern": "dist/*.tar.gz",
+            "target": "mousesoft/semver/VERSION/BRANCH/"
+        },
+        {   "pattern": "dist/*.whl",
+            "target": "mousesoft/semver/VERSION/BRANCH/"
+        },
+        {   "pattern": "deb_dist/*.deb",
+            "target": "mousesoft/semver/VERSION/BRANCH/"
+        }
+    ]
+}
