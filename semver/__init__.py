@@ -286,7 +286,7 @@ def clean(version, loose):
 NUMERIC = re.compile(r"^\d+$")
 
 
-def semver(version, loose):
+def semver(version, loose, include_prerelease=False):
     if isinstance(version, SemVer):
         if version.loose == loose:
             return version
@@ -299,7 +299,7 @@ def semver(version, loose):
     if (!(this instanceof SemVer))
        return new SemVer(version, loose);
     """
-    return SemVer(version, loose)
+    return SemVer(version, loose, include_prerelease)
 
 
 make_semver = semver
@@ -308,9 +308,10 @@ make_semver = semver
 class SemVer(object):
     # major, minor, patch, prerelease, build, micro_version
 
-    def __init__(self, version, loose):
+    def __init__(self, version, loose, include_prerelease):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
+        self.include_prerelease = include_prerelease
         self.raw = version
         self.micro_versions = []
         self.build = []
@@ -407,6 +408,9 @@ class SemVer(object):
     def compare_pre(self, other):
         if not isinstance(other, SemVer):
             other = make_semver(other, self.loose)
+
+        if self.include_prerelease:
+            return 0
 
         #  NOT having a prerelease is > having one
         is_self_more_than_zero = len(self.prerelease) > 0
@@ -811,7 +815,7 @@ class Range(object):
             return False
 
         if isinstance(version, str):
-            version = make_semver(version, loose=self.loose)
+            version = make_semver(version, loose=self.loose, include_prerelease=include_prerelease)
 
         for e in self.set:
             if test_set(e, version, include_prerelease=include_prerelease):
