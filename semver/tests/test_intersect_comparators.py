@@ -46,12 +46,12 @@ def test_it(v0, v1, expect, loose):
     actual2 = comparator2.intersects(comparator1)
     actual3 = intersects(comparator1, comparator2)
     actual4 = intersects(comparator2, comparator1)
-    actual4 = intersects(comparator1, comparator2, True)
-    actual5 = intersects(comparator2, comparator1, True)
-    actual6 = intersects(v0, v1)
-    actual7 = intersects(v1, v0)
-    actual8 = intersects(v0, v1, True)
-    actual9 = intersects(v1, v0, True)
+    actual5 = intersects(comparator1, comparator2, True)
+    actual6 = intersects(comparator2, comparator1, True)
+    actual7 = intersects(v0, v1)
+    actual8 = intersects(v1, v0)
+    actual9 = intersects(v0, v1, True)
+    actual10 = intersects(v1, v0, True)
     assert actual1 == expect
     assert actual2 == expect
     assert actual3 == expect
@@ -61,3 +61,4 @@ def test_it(v0, v1, expect, loose):
     assert actual7 == expect
     assert actual8 == expect
     assert actual9 == expect
+    assert actual10 == expect
