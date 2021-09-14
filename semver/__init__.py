@@ -67,6 +67,11 @@ src[NUMERICIDENTIFIERLOOSE] = '[0-9]+'
 NONNUMERICIDENTIFIER = R()
 src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*'
 
+# A non-numeric identifier not beginning with a number
+
+NONNUMERICIDENTIFIERBEGINNONNUMBER = R()
+src[NONNUMERICIDENTIFIERBEGINNONNUMBER] = '[a-zA-Z-][a-zA-Z0-9-]*'
+
 # ## Main Version
 # Three dot-separated numeric identifiers.
 
@@ -102,7 +107,8 @@ src[PRERELEASE] = ('(?:-(' + src[PRERELEASEIDENTIFIER] +
                    '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))')
 
 PRERELEASELOOSE = R()
-src[PRERELEASELOOSE] = ('(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
+src[PRERELEASELOOSE] = ('(?:-?((?:(?<=-)' + src[PRERELEASEIDENTIFIERLOOSE] +
+                        '|' + src[NONNUMERICIDENTIFIERBEGINNONNUMBER] + ')'
                         '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))')
 
 # ## Build Metadata Identifier

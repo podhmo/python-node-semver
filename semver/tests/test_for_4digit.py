@@ -93,6 +93,16 @@ cands = [
             "micro_versions": [2, 2],
         }
     ),
+    (
+        "4.1.33.2", True, {
+            "major": 4,
+            "minor": 1,
+            "patch": 33,
+            "prerelease": [],
+            "build": [],
+            "micro_versions": [2],
+        }
+    ),
 ]
 
 
