@@ -49,7 +49,7 @@ setup(
     keywords="version semver node-semver",
     author="podhmo",
     author_email="ababjam61+github@gmail.com",
-    url="https://github.com/podhmo/python-semver",
+    url="https://github.com/podhmo/python-node-semver",
     packages=find_packages(exclude=["nodesemver.tests"]),
     include_package_data=True,
     zip_safe=False,

@@ -335,7 +335,7 @@ class SemVer(object):
             self.minor = int(m.group(2)) if m.group(2) else 0
             self.patch = 0
             if not m.group(3):
-                # this is not same behaviour  node's semver (see: https://github.com/podhmo/python-semver/issues/15)
+                # this is not same behaviour  node's semver (see: https://github.com/podhmo/python-node-semver/issues/15)
                 self.prerelease = [id for id in version.strip()[m.end():].split(".") if id]
                 if self.prerelease and NUMERIC.search(self.prerelease[0]):
                     self.patch = int(self.prerelease[0])

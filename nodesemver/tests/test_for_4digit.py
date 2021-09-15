@@ -1,4 +1,4 @@
-# https://github.com/podhmo/python-semver/issues/15
+# https://github.com/podhmo/python-node-semver/issues/15
 import pytest
 
 cands = [

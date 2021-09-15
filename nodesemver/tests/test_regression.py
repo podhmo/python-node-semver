@@ -1,7 +1,7 @@
 import pytest
 
 cands = [
-    # https://github.com/podhmo/python-semver/issues/5
+    # https://github.com/podhmo/python-node-semver/issues/5
     ["<=1.2", "1.2.0", ["1.1.1", "1.2.0-pre", "1.2.0", "1.1.1-111", "1.1.1-21"]],
     ["<=1.2", "1.2", ["1.1.1", "1.2.0-pre", "1.2", "1.1.1-111", "1.1.1-21"]],
     ["<=1.2.0", "1.2.0", ["1.1.1", "1.2.0-pre", "1.2.0", "1.1.1-111", "1.1.1-21"]],
