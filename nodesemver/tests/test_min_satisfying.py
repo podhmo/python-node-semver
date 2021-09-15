@@ -13,5 +13,5 @@ cands = [
 
 @pytest.mark.parametrize("versions, range_, expect, loose", cands)
 def test_it(versions, range_, expect, loose):
-    from semver import min_satisfying
+    from nodesemver import min_satisfying
     assert min_satisfying(versions, range_, loose) == expect

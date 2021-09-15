@@ -41,61 +41,61 @@ cands = [
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_gt(v0, v1, loose):
-    from semver import gt
+    from nodesemver import gt
     assert gt(v0, v1, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_lt(v0, v1, loose):
-    from semver import lt
+    from nodesemver import lt
     assert lt(v1, v0, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_ngt(v0, v1, loose):
-    from semver import gt
+    from nodesemver import gt
     assert (not gt(v1, v0, loose)) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_nlt(v0, v1, loose):
-    from semver import lt
+    from nodesemver import lt
     assert (not lt(v0, v1, loose)) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_eq(v0, v1, loose):
-    from semver import eq
+    from nodesemver import eq
     assert eq(v0, v0, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_eq2(v0, v1, loose):
-    from semver import eq
+    from nodesemver import eq
     assert eq(v1, v1, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_cmp(v0, v1, loose):
-    from semver import cmp
+    from nodesemver import cmp
     assert cmp(v1, "==", v1, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_cmp2(v0, v1, loose):
-    from semver import cmp
+    from nodesemver import cmp
     cmp(v0, ">=", v1, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_cmp3(v0, v1, loose):
-    from semver import cmp
+    from nodesemver import cmp
     cmp(v1, "<=", v0, loose) is True
 
 
 @pytest.mark.parametrize("v0, v1, loose", cands)
 def test_cmp4(v0, v1, loose):
-    from semver import cmp
+    from nodesemver import cmp
     cmp(v0, "!=", v1, loose) is True
 
 """

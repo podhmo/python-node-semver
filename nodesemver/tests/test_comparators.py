@@ -79,6 +79,6 @@ cands = [
 
 @pytest.mark.parametrize("pre, wanted", cands)
 def test_it(pre, wanted):
-    from semver import to_comparators
+    from nodesemver import to_comparators
     loose = False
     assert to_comparators(pre, loose) == wanted

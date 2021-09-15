@@ -108,7 +108,7 @@ cands = [
 
 @pytest.mark.parametrize("v, loose, expected", cands)
 def test_parse(v, loose, expected):
-    from semver import make_semver
+    from nodesemver import make_semver
     got = make_semver(v, loose=loose)
     assert got.raw == v
     assert got.major == expected["major"]
@@ -120,7 +120,7 @@ def test_parse(v, loose, expected):
 
 
 def test_sorted():
-    from semver import _sorted
+    from nodesemver import _sorted
 
     v1 = "1.1"
     v2 = "1.1.1"

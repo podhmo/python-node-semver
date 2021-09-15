@@ -65,28 +65,28 @@ def _shuffled_copy(source, seed=0):
 
 
 def test_sort():
-    from semver import sort
+    from nodesemver import sort
     to_sort = _shuffled_copy(versions)
     sort(to_sort, True)
     assert versions == to_sort
 
 
 def test_prerelease_sort():
-    from semver import sort
+    from nodesemver import sort
     to_sort = _shuffled_copy(spec_prerelease_examples)
     sort(to_sort, False)
     assert spec_prerelease_examples == to_sort
 
 
 def test_rsort():
-    from semver import rsort
+    from nodesemver import rsort
     to_sort = _shuffled_copy(versions)
     rsort(to_sort, True)
     assert list(reversed(versions)) == to_sort
 
 
 def test_prerelease_rsort():
-    from semver import rsort
+    from nodesemver import rsort
     to_sort = _shuffled_copy(spec_prerelease_examples)
     rsort(to_sort, False)
     assert list(reversed(spec_prerelease_examples)) == to_sort

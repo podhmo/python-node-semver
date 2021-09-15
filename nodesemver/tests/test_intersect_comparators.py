@@ -39,7 +39,7 @@ cands = [
 @pytest.mark.skip(reason="not implemented yet")
 # @pytest.mark.parametrize("v0, v1, expect, loose", cands)
 def test_it(v0, v1, expect, loose):
-    from semver import make_comparator, intersects
+    from nodesemver import make_comparator, intersects
     comparator1 = make_comparator(v0)
     comparator2 = make_comparator(v1)
     actual1 = comparator1.intersects(comparator2)

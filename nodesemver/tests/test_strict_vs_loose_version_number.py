@@ -14,7 +14,7 @@ cands = [
 @pytest.mark.parametrize("loose, strict", cands)
 def test_it(loose, strict):
     import pytest
-    from semver import make_semver, eq
+    from nodesemver import make_semver, eq
 
     with pytest.raises(ValueError):
         make_semver(loose, False)
@@ -39,7 +39,7 @@ cands = [
 @pytest.mark.parametrize("loose, comps", cands)
 def test_it_for_range(loose, comps):
     import pytest
-    from semver import make_range
+    from nodesemver import make_range
 
     with pytest.raises(ValueError):
         make_range(loose, False)

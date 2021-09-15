@@ -25,7 +25,7 @@ cands = [
 @pytest.mark.parametrize("v, loose, exc", cands)
 def test_it(v, loose, exc):
     import pytest
-    from semver import make_semver
+    from nodesemver import make_semver
     if exc is not None:
         with pytest.raises(exc):
             make_semver(v, loose)

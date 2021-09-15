@@ -3,10 +3,10 @@ import pytest
 
 def test_max_satisfying():
     def _callFUT(versions, range_):
-        from semver import max_satisfying
+        from nodesemver import max_satisfying
         max_satisfying(versions, range_)
 
-    from semver import InvalidTypeIncluded
+    from nodesemver import InvalidTypeIncluded
     with pytest.raises(InvalidTypeIncluded):
         _callFUT([b"1.0.0"], "1.0.0")
     with pytest.raises(InvalidTypeIncluded):
@@ -20,10 +20,10 @@ def test_max_satisfying():
 
 def test_satisfies():
     def _callFUT(version, range_):
-        from semver import satisfies
+        from nodesemver import satisfies
         satisfies(version, range_)
 
-    from semver import InvalidTypeIncluded
+    from nodesemver import InvalidTypeIncluded
     with pytest.raises(InvalidTypeIncluded):
         _callFUT(b"1.0.0", "1.0.0")
     with pytest.raises(InvalidTypeIncluded):

@@ -112,5 +112,5 @@ cands = [
 
 @pytest.mark.parametrize("range_, version, loose, include_prerelease", cands)
 def test_it(range_, version, loose, include_prerelease):
-    from semver import satisfies
+    from nodesemver import satisfies
     assert satisfies(version, range_, loose, include_prerelease) is True
