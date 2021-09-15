@@ -1,7 +1,7 @@
 semver
 =================
 
-.. |github action| image:: https://github.com/podhmo/node-semver/actions/workflows/python-package.yml/badge.svg)
+.. image:: https://github.com/podhmo/python-semver/actions/workflows/python-package.yml/badge.svg
     :target: https://github.com/podhmo/python-semver/actions/workflows/python-package.yml
 
 python version of [node-semver](https://github.com/isaacs/node-semver)
