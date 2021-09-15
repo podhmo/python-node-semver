@@ -62,7 +62,7 @@ cands = [
 
 @pytest.mark.parametrize("versions, range_, expect, loose, include_prerelease", cands)
 def test_it(versions, range_, expect, loose, include_prerelease):
-    from semver import max_satisfying
+    from nodesemver import max_satisfying
     if isinstance(expect, type) and issubclass(expect, Exception):
         with pytest.raises(expect):
             max_satisfying(versions, range_, loose, include_prerelease)

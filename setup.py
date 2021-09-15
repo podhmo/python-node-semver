@@ -38,7 +38,7 @@ class PyTest(TestCommand):
 
 setup(
     name="node-semver",
-    version="0.8.0",
+    version="0.8.1",
     description="port of node-semver",
     long_description=README + "\n\n" + CHANGES,
     classifiers=[
@@ -46,11 +46,11 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
-    keywords="version semver",
+    keywords="version semver node-semver",
     author="podhmo",
     author_email="ababjam61+github@gmail.com",
     url="https://github.com/podhmo/python-semver",
-    packages=find_packages(exclude=["semver.tests"]),
+    packages=find_packages(exclude=["nodesemver.tests"]),
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,

@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
-from semver import satisfies
+from nodesemver import satisfies
 
 assert satisfies("1.2.3-dev.1+abc", ">1.1.0 <2.0.0", include_prerelease=True)
 assert not satisfies("1.2.3-dev.1+abc", ">1.1.0 <2.0.0", include_prerelease=False)
 assert satisfies("1.2.3", ">1.1 <2.0")
 
 
-from semver import max_satisfying
+from nodesemver import max_satisfying
 
 versions = ['1.2.3', '1.2.4', '1.2.5', '1.2.6', '2.0.1']
 range_ = '~1.2.3'

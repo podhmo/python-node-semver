@@ -89,5 +89,5 @@ cands = [
 
 @pytest.mark.parametrize("pre, what, wanted, loose, identifier", cands)
 def test_it(pre, what, wanted, loose, identifier):
-    from semver import inc
+    from nodesemver import inc
     assert inc(pre, what, loose, identifier=identifier) == wanted

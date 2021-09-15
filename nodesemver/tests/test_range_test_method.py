@@ -8,6 +8,6 @@ cands = [
 
 @pytest.mark.parametrize("range_, version, loose, expected", cands)
 def test_it(range_, version, loose, expected):
-    from semver import make_semver, satisfies
+    from nodesemver import make_semver, satisfies
     # assert expected == make_semver(range_, loose=loose).test(version)
     assert expected == satisfies(version, range_, loose=loose)

@@ -11,6 +11,6 @@ cands = [
 
 @pytest.mark.parametrize("op, wanted, cands", cands)
 def test_it(op, wanted, cands):
-    from semver import max_satisfying
+    from nodesemver import max_satisfying
     got = max_satisfying(cands, op, loose=True)
     assert got == wanted
