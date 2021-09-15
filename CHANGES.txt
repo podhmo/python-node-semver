@@ -1,6 +1,11 @@
+0.9.1
+
+- RENAME MODULE semver -> nodesemver (#39)
+- pre release range fix (#40)
+
 0.8.1
 
-- fix erroneous parsing of $ component version numbers (#40)
+- fix erroneous parsing of $ component version numbers (#44)
 
 0.8.0
 
