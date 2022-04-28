@@ -1,3 +1,7 @@
+0.8.1
+
+- fix erroneous parsing of $ component version numbers (#44)
+
 0.8.0
 
 - handle 4-digit version correctly (#35)
