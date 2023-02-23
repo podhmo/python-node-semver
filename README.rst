@@ -18,7 +18,7 @@ examples
 
 .. code-block:: python
 
-   from semver import max_satisfying
+   from nodesemver import max_satisfying
 
    versions = ['1.2.3', '1.2.4', '1.2.5', '1.2.6', '2.0.1']
    range_ = '~1.2.3'
