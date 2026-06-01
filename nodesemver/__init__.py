@@ -275,7 +275,7 @@ def parse(version, loose):
 
 def valid(version, loose):
     v = parse(version, loose)
-    if v.version:
+    if v and v.version:
         return v
     else:
         return None
