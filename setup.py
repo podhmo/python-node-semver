@@ -41,6 +41,7 @@ setup(
     version="0.9.1",
     description="port of node-semver",
     long_description=README + "\n\n" + CHANGES,
+    long_description_content_type='text/x-rst',
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
